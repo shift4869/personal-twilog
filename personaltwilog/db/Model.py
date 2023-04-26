@@ -272,6 +272,8 @@ class ExternalLink(Base):
     """外部リンクモデル
         [id] INTEGER NOT NULL UNIQUE,
         [tweet_id] TEXT NOT NULL,
+        [tweet_text] TEXT,
+        [tweet_via] TEXT,
         [tweet_url] TEXT NOT NULL,
         [external_link_url] TEXT NOT NULL,
         [external_link_type] TEXT,
@@ -284,7 +286,9 @@ class ExternalLink(Base):
     __tablename__ = "ExternalLink"
 
     id = Column(Integer, primary_key=True)
-    tweet_id = Column(String(256), nullable=False)
+    tweet_id = Column(String(256), nullable=False, unique=True)
+    tweet_text = Column(String(256))
+    tweet_via = Column(String(256))
     tweet_url = Column(String(256), nullable=False)
     external_link_url = Column(String(256), nullable=False)
     external_link_type = Column(String(256))
@@ -294,6 +298,8 @@ class ExternalLink(Base):
 
     def __init__(self,
                  tweet_id: str,
+                 tweet_text: str,
+                 tweet_via: str,
                  tweet_url: str,
                  external_link_url: str,
                  external_link_type: str,
@@ -302,6 +308,8 @@ class ExternalLink(Base):
                  registered_at: str):
         # self.id = id
         self.tweet_id = tweet_id
+        self.tweet_text = tweet_text
+        self.tweet_via = tweet_via
         self.tweet_url = tweet_url
         self.external_link_url = external_link_url
         self.external_link_type = external_link_type
@@ -314,6 +322,8 @@ class ExternalLink(Base):
         match args_dict:
             case {
                 "tweet_id": tweet_id,
+                "tweet_text": tweet_text,
+                "tweet_via": tweet_via,
                 "tweet_url": tweet_url,
                 "external_link_url": external_link_url,
                 "external_link_type": external_link_type,
@@ -322,6 +332,8 @@ class ExternalLink(Base):
                 "registered_at": registered_at,
             }:
                 return ExternalLink(tweet_id,
+                                    tweet_text,
+                                    tweet_via,
                                     tweet_url,
                                     external_link_url,
                                     external_link_type,
@@ -340,6 +352,8 @@ class ExternalLink(Base):
     def to_dict(self) -> dict:
         return {
             "tweet_id": self.tweet_id,
+            "tweet_text": self.tweet_text,
+            "tweet_via": self.tweet_via,
             "tweet_url": self.tweet_url,
             "external_link_url": self.external_link_url,
             "external_link_type": self.external_link_type,
