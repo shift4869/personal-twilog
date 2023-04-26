@@ -3,22 +3,18 @@ import configparser
 import copy
 import json
 import logging.config
-import pprint
 import re
 import sys
 import urllib.parse
 from datetime import datetime, timedelta
 from logging import INFO, getLogger
 from pathlib import Path
-from time import sleep
-from typing import Literal
 
 import requests
 
 from personaltwilog.db.ExternalLinkDB import ExternalLinkDB
 from personaltwilog.db.MediaDB import MediaDB
 from personaltwilog.db.MetricDB import MetricDB
-from personaltwilog.db.Model import Tweet
 from personaltwilog.db.TweetDB import TweetDB
 from personaltwilog.webapi.TwitterAPI import TwitterAPI
 
@@ -214,9 +210,10 @@ class TimelineCrawler():
                     },
                 },
             }:
-                retweet_tweet = tweet.get("legacy", {}) \
-                                     .get("retweeted_status_result", {}) \
-                                     .get("result")
+                retweet_tweet_result = tweet.get("legacy", {}) \
+                                            .get("retweeted_status_result", {}) \
+                                            .get("result", {})
+                retweet_tweet = retweet_tweet_result
                 quote_tweet = quote_tweet_result
         return (retweet_tweet, quote_tweet)
 
@@ -235,7 +232,7 @@ class TimelineCrawler():
             }:
                 created_at_str = created_at_tweet_str
             case _:
-                ValueError("Argument tweet.legacy.created_at is not exist.")
+                raise ValueError("Argument tweet.legacy.created_at is not exist.")
 
         td_format = "%a %b %d %H:%M:%S +0000 %Y"
         created_at_gmt = datetime.strptime(created_at_str, td_format)
@@ -261,9 +258,14 @@ class TimelineCrawler():
         Returns:
             list[dict]: 元のツイート, RT先ツイート, QT先ツイート が1階層に格納された tweet 辞書
         """
-        flattened_tweet_list = []
+        edited_tweet_list: list[dict] = []
+        flattened_tweet_list: list[dict] = []
         for tweet in tweet_list:
             tweet = tweet.get("result", {})
+            if tweet.get("__typename", "") == "TweetWithVisibilityResults":
+                # 辞書構造が異なる場合がある？
+                # 閲覧アカウントを制限しているツイート？
+                tweet = tweet.get("tweet", {})
             retweet_tweet, quote_tweet = self._match_rt_quote(tweet)
 
             # 元ツイートの appeared_at は created_at と同じ
@@ -285,7 +287,32 @@ class TimelineCrawler():
                 # QT の appeared_at とする
                 quote_tweet["appeared_at"] = appeared_at
                 flattened_tweet_list.append(quote_tweet)
-        return flattened_tweet_list
+
+        # 構造チェックして、必要なら整合性をとる
+        for tweet in flattened_tweet_list:
+            if tweet.get("__typename", "") == "TweetWithVisibilityResults":
+                appeared_at = tweet.get("appeared_at", "")
+                tweet = tweet.get("tweet", {})
+                tweet["appeared_at"] = appeared_at
+            match tweet:
+                case {
+                    "core": {
+                        "user_results": {
+                            "result": {
+                                "legacy": l1,
+                            }
+                        }
+                    },
+                    "legacy": l2,
+                    "rest_id": rest_id,
+                    "source": source,
+                } if l1 != {} and l2 != {} and rest_id != "" and source != "":
+                    pass
+                case _:
+                    raise ValueError
+            edited_tweet_list.append(tweet)
+
+        return edited_tweet_list
 
     def _interporate_to_tweet(self, flattened_tweet_list: list[dict]) -> list[dict]:
         """tweet_list を解釈してDBに投入する
