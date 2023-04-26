@@ -11,8 +11,8 @@ from typing import Literal
 
 from requests.models import Response
 
-from .TwitterAPIEndpoint import TwitterAPIEndpoint, TwitterAPIEndpointName
-from .TwitterSession import TwitterSession
+from personaltwilog.webapi.TwitterAPIEndpoint import TwitterAPIEndpoint, TwitterAPIEndpointName
+from personaltwilog.webapi.TwitterSession import TwitterSession
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -20,27 +20,13 @@ logger.setLevel(INFO)
 
 class TwitterAPI():
     screen_name: str
+    target_screen_name: str
     twitter_session: TwitterSession
 
-    def __init__(self, screen_name) -> None:
+    def __init__(self, screen_name: str, target_screen_name: str = "") -> None:
         self.screen_name = screen_name
+        self.target_screen_name = target_screen_name or screen_name
         self.twitter_session = TwitterSession.create(screen_name)
-
-    @property
-    def user_id(self):
-        if not hasattr(self, "_user_id"):
-            screen_name = self.screen_name
-            user_dict = self.lookup_user_by_screen_name(screen_name)
-            user_id = user_dict.get("data", {}) \
-                               .get("user", {}) \
-                               .get("result", {}) \
-                               .get("rest_id", "")
-            if user_id == "":
-                raise ValueError("Getting user_id is failed.")
-            self._user_id = user_id
-            return self._user_id
-        else:
-            return self._user_id
 
     @property
     def common_features(self):
@@ -66,6 +52,23 @@ class TwitterAPI():
             "view_counts_everywhere_api_enabled": True,
         }
         return features_dict
+
+    def _get_user_id(self, screen_name):
+        if not hasattr(self, "_id_name_dict"):
+            self._id_name_dict = {}
+
+        user_id = self._id_name_dict.get(screen_name, "")
+        if user_id != "":
+            return user_id
+        user_dict = self.lookup_user_by_screen_name(screen_name)
+        user_id = user_dict.get("data", {}) \
+                           .get("user", {}) \
+                           .get("result", {}) \
+                           .get("rest_id", "")
+        if user_id == "":
+            raise ValueError("Getting user_id is failed.")
+        self._id_name_dict[screen_name] = user_id
+        return user_id
 
     def lookup_user_by_screen_name(self, screen_name: str) -> dict:
         logger.info(f"GET user by screen_name, target user is '{screen_name}' -> start")
@@ -122,7 +125,7 @@ class TwitterAPI():
         features_str = json.dumps(features_dict, separators=(",", ":"))
 
         # user_id 取得
-        user_id: str = self.user_id
+        user_id: str = self._get_user_id(screen_name)
 
         variables_dict = {
             "count": 20,
@@ -227,7 +230,7 @@ class TwitterAPI():
         features_str = json.dumps(features_dict, separators=(",", ":"))
 
         # user_id 取得
-        user_id: str = self.user_id
+        user_id: str = self._get_user_id(screen_name)
 
         variables_dict = {
             "userId": user_id,
@@ -416,7 +419,7 @@ class TwitterAPI():
         logger.info(f"GET tweet detail -> done")
         return result
 
-    def _get_ff_list(self, ff_type: Literal["following", "follower"]) -> list[dict]:
+    def _get_ff_list(self, screen_name, ff_type: Literal["following", "follower"]) -> list[dict]:
         logger.info(f"GET {ff_type} list -> start")
         result = []
         url = ""
@@ -430,7 +433,7 @@ class TwitterAPI():
         features_str = json.dumps(features_dict, separators=(",", ":"))
 
         # ユーザーIDを取得する
-        user_id: str = self.user_id
+        user_id: str = self._get_user_id(screen_name)
 
         variables_dict = {
             "userId": user_id,
@@ -624,7 +627,7 @@ class TwitterAPI():
         }
 
         # user_id 取得
-        user_id: str = self.user_id
+        user_id: str = self._get_user_id(screen_name)
 
         variables_dict = {
             "listId": list_id,
@@ -731,8 +734,9 @@ if __name__ == "__main__":
     if not config.read(CONFIG_FILE_NAME, encoding="utf8"):
         raise IOError
 
-    screen_name = config["twitter"]["screen_name"]
-    twitter = TwitterAPI(screen_name)
+    authorize_screen_name = config["twitter"]["authorize_screen_name"]
+    target_screen_name = config["twitter"]["target_screen_name"]
+    twitter = TwitterAPI(authorize_screen_name, target_screen_name)
     result: dict | list[dict] = []
 
     def save_response(result_data):
@@ -758,6 +762,9 @@ if __name__ == "__main__":
 
     pprint.pprint("TL 取得")
     result = twitter.get_user_timeline(twitter.screen_name, 30)
+    save_response(result)
+    pprint.pprint(len(result))
+    result = twitter.get_user_timeline(twitter.target_screen_name, 30)
     save_response(result)
     pprint.pprint(len(result))
     exit(0)
@@ -832,8 +839,8 @@ if __name__ == "__main__":
     pprint.pprint(len(result))
 
     pprint.pprint("ミュートユーザー追加")
-    screen_name = "o_shift4607"
-    result = twitter.mute_user(screen_name)
+    authorize_screen_name = "o_shift4607"
+    result = twitter.mute_user(authorize_screen_name)
     save_response(result)
     pprint.pprint(len(result))
 
@@ -846,8 +853,8 @@ if __name__ == "__main__":
     pprint.pprint(len(result))
 
     pprint.pprint("ミュートユーザー解除")
-    screen_name = "o_shift4607"
-    result = twitter.unmute_user(screen_name)
+    authorize_screen_name = "o_shift4607"
+    result = twitter.unmute_user(authorize_screen_name)
     save_response(result)
     pprint.pprint(len(result))
 

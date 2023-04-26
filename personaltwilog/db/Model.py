@@ -162,6 +162,8 @@ class Media(Base):
         [media_type] TEXT NOT NULL,
         [media_size] INTEGER NOT NULL,
         [created_at] TEXT NOT NULL,
+        [appeared_at] TEXT NOT NULL,
+        [registered_at] TEXT NOT NULL,
         PRIMARY KEY([id])
     """
 
@@ -169,44 +171,64 @@ class Media(Base):
 
     id = Column(Integer, primary_key=True)
     tweet_id = Column(String(256), nullable=False)
+    tweet_url = Column(String(256), nullable=False)
     media_filename = Column(String(256), nullable=False)
     media_url = Column(String(256), nullable=False)
+    media_thumbnail_url = Column(String(256), nullable=False)
     media_type = Column(String(256), nullable=False)
     media_size = Column(Integer, nullable=False)
     created_at = Column(String(256), nullable=False)
+    appeared_at = Column(String(256), nullable=False)
+    registered_at = Column(String(256), nullable=False)
 
     def __init__(self,
                  tweet_id: str,
+                 tweet_url: str,
                  media_filename: str,
                  media_url: str,
+                 media_thumbnail_url: str,
                  media_type: str,
                  media_size: int,
-                 created_at: str):
+                 created_at: str,
+                 appeared_at: str,
+                 registered_at: str):
         # self.id = id
         self.tweet_id = tweet_id
+        self.tweet_url = tweet_url
         self.media_filename = media_filename
         self.media_url = media_url
+        self.media_thumbnail_url = media_thumbnail_url
         self.media_type = media_type
         self.media_size = media_size
         self.created_at = created_at
+        self.appeared_at = appeared_at
+        self.registered_at = registered_at
 
     @classmethod
     def create(self, args_dict: dict) -> Self:
         match args_dict:
             case {
                 "tweet_id": tweet_id,
+                "tweet_url": tweet_url,
                 "media_filename": media_filename,
                 "media_url": media_url,
+                "media_thumbnail_url": media_thumbnail_url,
                 "media_type": media_type,
                 "media_size": media_size,
                 "created_at": created_at,
+                "appeared_at": appeared_at,
+                "registered_at": registered_at,
             }:
                 return Media(tweet_id,
+                             tweet_url,
                              media_filename,
                              media_url,
+                             media_thumbnail_url,
                              media_type,
                              media_size,
-                             created_at)
+                             created_at,
+                             appeared_at,
+                             registered_at)
             case _:
                 raise ValueError("Unmatch args_dict.")
 
@@ -214,16 +236,101 @@ class Media(Base):
         return f"<Media(tweet_id='{self.tweet_id}', media_filename='{self.media_filename}')>"
 
     def __eq__(self, other):
-        return isinstance(other, Media) and other.media_url == self.media_url
+        return isinstance(other, Media) and other.media_url == self.media_url and other.tweet_id == self.tweet_id
 
     def to_dict(self) -> dict:
         return {
             "tweet_id": self.tweet_id,
+            "tweet_url": self.tweet_url,
             "media_filename": self.media_filename,
             "media_url": self.media_url,
+            "media_thumbnail_url": self.media_thumbnail_url,
             "media_type": self.media_type,
             "media_size": self.media_size,
             "created_at": self.created_at,
+            "appeared_at": self.appeared_at,
+            "registered_at": self.registered_at,
+        }
+
+
+class ExternalLink(Base):
+    """外部リンクモデル
+        [id] INTEGER NOT NULL UNIQUE,
+        [tweet_id] TEXT NOT NULL,
+        [tweet_url] TEXT NOT NULL,
+        [external_link_url] TEXT NOT NULL,
+        [external_link_type] TEXT,
+        [created_at] TEXT NOT NULL,
+        [appeared_at] TEXT NOT NULL,
+        [registered_at] TEXT NOT NULL,
+        PRIMARY KEY([id])
+    """
+
+    __tablename__ = "ExternalLink"
+
+    id = Column(Integer, primary_key=True)
+    tweet_id = Column(String(256), nullable=False)
+    tweet_url = Column(String(256), nullable=False)
+    external_link_url = Column(String(256), nullable=False)
+    external_link_type = Column(String(256))
+    created_at = Column(String(256), nullable=False)
+    appeared_at = Column(String(256), nullable=False)
+    registered_at = Column(String(256), nullable=False)
+
+    def __init__(self,
+                 tweet_id: str,
+                 tweet_url: str,
+                 external_link_url: str,
+                 external_link_type: str,
+                 created_at: str,
+                 appeared_at: str,
+                 registered_at: str):
+        # self.id = id
+        self.tweet_id = tweet_id
+        self.tweet_url = tweet_url
+        self.external_link_url = external_link_url
+        self.external_link_type = external_link_type
+        self.created_at = created_at
+        self.appeared_at = appeared_at
+        self.registered_at = registered_at
+
+    @classmethod
+    def create(self, args_dict: dict) -> Self:
+        match args_dict:
+            case {
+                "tweet_id": tweet_id,
+                "tweet_url": tweet_url,
+                "external_link_url": external_link_url,
+                "external_link_type": external_link_type,
+                "created_at": created_at,
+                "appeared_at": appeared_at,
+                "registered_at": registered_at,
+            }:
+                return ExternalLink(tweet_id,
+                                    tweet_url,
+                                    external_link_url,
+                                    external_link_type,
+                                    created_at,
+                                    appeared_at,
+                                    registered_at)
+            case _:
+                raise ValueError("Unmatch args_dict.")
+
+    def __repr__(self):
+        return f"<Metric(created_at='{self.created_at}')>"
+
+    def __eq__(self, other):
+        return isinstance(other, ExternalLink) and other.external_link_url == self.external_link_url and other.tweet_id == self.tweet_id
+
+    def to_dict(self) -> dict:
+        return {
+            "tweet_id": self.tweet_id,
+            "tweet_url": self.tweet_url,
+            "external_link_url": self.external_link_url,
+            "external_link_type": self.external_link_type,
+            "created_at": self.created_at,
+            "appeared_at": self.appeared_at,
+            "registered_at": self.registered_at,
         }
 
 
@@ -235,7 +342,7 @@ class Metric(Base):
         [media_count] INTEGER NOT NULL,
         [following_count] INTEGER NOT NULL,
         [followers_count] INTEGER NOT NULL,
-        [created_at] TEXT NOT NULL,
+        [registered_at] TEXT NOT NULL,
         PRIMARY KEY([id])
     """
 
@@ -247,7 +354,7 @@ class Metric(Base):
     media_count = Column(Integer, nullable=False)
     following_count = Column(Integer, nullable=False)
     followers_count = Column(Integer, nullable=False)
-    created_at = Column(String(256), nullable=False)
+    registered_at = Column(String(256), nullable=False)
 
     def __init__(self,
                  status_count: int,
@@ -255,14 +362,14 @@ class Metric(Base):
                  media_count: int,
                  following_count: int,
                  followers_count: int,
-                 created_at: str):
+                 registered_at: str):
         # self.id = id
         self.status_count = status_count
         self.favourite_count = favourite_count
         self.media_count = media_count
         self.following_count = following_count
         self.followers_count = followers_count
-        self.created_at = created_at
+        self.registered_at = registered_at
 
     @classmethod
     def create(self, args_dict: dict) -> Self:
@@ -273,22 +380,22 @@ class Metric(Base):
                 "media_count": media_count,
                 "following_count": following_count,
                 "followers_count": followers_count,
-                "created_at": created_at,
+                "registered_at": registered_at,
             }:
                 return Metric(status_count,
                               favourite_count,
                               media_count,
                               following_count,
                               followers_count,
-                              created_at)
+                              registered_at)
             case _:
                 raise ValueError("Unmatch args_dict.")
 
     def __repr__(self):
-        return f"<Metric(created_at='{self.created_at}')>"
+        return f"<Metric(registered_at='{self.registered_at}')>"
 
     def __eq__(self, other):
-        return isinstance(other, Media) and other.created_at == self.created_at
+        return isinstance(other, Metric) and other.registered_at == self.registered_at
 
     def to_dict(self) -> dict:
         return {
@@ -297,67 +404,7 @@ class Metric(Base):
             "media_count": self.media_count,
             "following_count": self.following_count,
             "followers_count": self.followers_count,
-            "created_at": self.created_at,
-        }
-
-
-class ExternalLink(Base):
-    """外部リンクモデル
-        [id] INTEGER NOT NULL UNIQUE,
-        [tweet_id] TEXT NOT NULL,
-        [external_link_url] TEXT NOT NULL,
-        [external_link_type] TEXT NOT NULL,
-        [created_at] TEXT NOT NULL,
-        PRIMARY KEY([id])
-    """
-
-    __tablename__ = "ExternalLink"
-
-    id = Column(Integer, primary_key=True)
-    tweet_id = Column(String(256), nullable=False)
-    external_link_url = Column(String(256), nullable=False)
-    external_link_type = Column(String(256), nullable=False)
-    created_at = Column(String(256), nullable=False)
-
-    def __init__(self,
-                 tweet_id: str,
-                 external_link_url: str,
-                 external_link_type: str,
-                 created_at: str):
-        # self.id = id
-        self.tweet_id = tweet_id
-        self.external_link_url = external_link_url
-        self.external_link_type = external_link_type
-        self.created_at = created_at
-
-    @classmethod
-    def create(self, args_dict: dict) -> Self:
-        match args_dict:
-            case {
-                "tweet_id": tweet_id,
-                "external_link_url": external_link_url,
-                "external_link_type": external_link_type,
-                "created_at": created_at,
-            }:
-                return ExternalLink(tweet_id,
-                                    external_link_url,
-                                    external_link_type,
-                                    created_at)
-            case _:
-                raise ValueError("Unmatch args_dict.")
-
-    def __repr__(self):
-        return f"<Metric(created_at='{self.created_at}')>"
-
-    def __eq__(self, other):
-        return isinstance(other, Media) and other.created_at == self.created_at
-
-    def to_dict(self) -> dict:
-        return {
-            "tweet_id": self.tweet_id,
-            "external_link_url": self.external_link_url,
-            "external_link_type": self.external_link_type,
-            "created_at": self.created_at,
+            "registered_at": self.registered_at,
         }
 
 

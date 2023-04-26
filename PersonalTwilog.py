@@ -1,7 +1,5 @@
 # coding: utf-8
-import configparser
 import logging.config
-import sys
 from logging import INFO, getLogger
 
 from personaltwilog.TimelineCrawler import TimelineCrawler
@@ -14,5 +12,8 @@ logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 if __name__ == "__main__":
+    HORIZONTAL_LINE = "-" * 80
+    logger.info(HORIZONTAL_LINE)
     crawler = TimelineCrawler()
     crawler.run()
+    logger.info(HORIZONTAL_LINE)
