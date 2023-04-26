@@ -365,6 +365,9 @@ class TimelineCrawler():
             tweet_user_legacy: dict = tweet_user.get("legacy")
 
             tweet_id: str = tweet.get("rest_id")
+            tweet_text: str = tweet_legacy.get("full_text")
+            via_html: str = tweet.get("source")
+            tweet_via = re.findall("^<.+?>([^<]*?)<.+?>$", via_html)[0]
             screen_name: str = tweet_user_legacy.get("screen_name")
             tweet_url: str = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
@@ -387,6 +390,8 @@ class TimelineCrawler():
 
                 media_dict = {
                     "tweet_id": tweet_id,
+                    "tweet_text": tweet_text,
+                    "tweet_via": tweet_via,
                     "tweet_url": tweet_url,
                     "media_filename": media_filename,
                     "media_url": media_url,

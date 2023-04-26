@@ -157,6 +157,9 @@ class Media(Base):
     """メディアモデル
         [id] INTEGER NOT NULL UNIQUE,
         [tweet_id] TEXT NOT NULL,
+        [tweet_text] TEXT,
+        [tweet_via] TEXT,
+        [tweet_url] TEXT NOT NULL,
         [media_filename] TEXT NOT NULL,
         [media_url] TEXT NOT NULL,
         [media_type] TEXT NOT NULL,
@@ -170,7 +173,9 @@ class Media(Base):
     __tablename__ = "Media"
 
     id = Column(Integer, primary_key=True)
-    tweet_id = Column(String(256), nullable=False)
+    tweet_id = Column(String(256), nullable=False, unique=True)
+    tweet_text = Column(String(256))
+    tweet_via = Column(String(256))
     tweet_url = Column(String(256), nullable=False)
     media_filename = Column(String(256), nullable=False)
     media_url = Column(String(256), nullable=False)
@@ -183,6 +188,8 @@ class Media(Base):
 
     def __init__(self,
                  tweet_id: str,
+                 tweet_text: str,
+                 tweet_via: str,
                  tweet_url: str,
                  media_filename: str,
                  media_url: str,
@@ -194,6 +201,8 @@ class Media(Base):
                  registered_at: str):
         # self.id = id
         self.tweet_id = tweet_id
+        self.tweet_text = tweet_text
+        self.tweet_via = tweet_via
         self.tweet_url = tweet_url
         self.media_filename = media_filename
         self.media_url = media_url
@@ -209,6 +218,8 @@ class Media(Base):
         match args_dict:
             case {
                 "tweet_id": tweet_id,
+                "tweet_text": tweet_text,
+                "tweet_via": tweet_via,
                 "tweet_url": tweet_url,
                 "media_filename": media_filename,
                 "media_url": media_url,
@@ -220,6 +231,8 @@ class Media(Base):
                 "registered_at": registered_at,
             }:
                 return Media(tweet_id,
+                             tweet_text,
+                             tweet_via,
                              tweet_url,
                              media_filename,
                              media_url,
@@ -241,6 +254,8 @@ class Media(Base):
     def to_dict(self) -> dict:
         return {
             "tweet_id": self.tweet_id,
+            "tweet_text": self.tweet_text,
+            "tweet_via": self.tweet_via,
             "tweet_url": self.tweet_url,
             "media_filename": self.media_filename,
             "media_url": self.media_url,
