@@ -58,7 +58,7 @@ class MetricDB(Base):
                 # UPDATE
                 # id以外を更新する
                 p.status_count = r.status_count,
-                p.favourite_count = r.favourite_count,
+                p.favorite_count = r.favorite_count,
                 p.media_count = r.media_count,
                 p.following_count = r.following_count,
                 p.followers_count = r.followers_count,

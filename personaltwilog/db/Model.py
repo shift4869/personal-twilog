@@ -337,8 +337,9 @@ class ExternalLink(Base):
 class Metric(Base):
     """数値指標系モデル
         [id] INTEGER NOT NULL UNIQUE,
+        [screen_name] TEXT NOT NULL,
         [status_count] INTEGER NOT NULL,
-        [favourite_count] INTEGER NOT NULL,
+        [favorite_count] INTEGER NOT NULL,
         [media_count] INTEGER NOT NULL,
         [following_count] INTEGER NOT NULL,
         [followers_count] INTEGER NOT NULL,
@@ -349,23 +350,26 @@ class Metric(Base):
     __tablename__ = "Metric"
 
     id = Column(Integer, primary_key=True)
+    screen_name = Column(String(256), nullable=False)
     status_count = Column(Integer, nullable=False)
-    favourite_count = Column(Integer, nullable=False)
+    favorite_count = Column(Integer, nullable=False)
     media_count = Column(Integer, nullable=False)
     following_count = Column(Integer, nullable=False)
     followers_count = Column(Integer, nullable=False)
     registered_at = Column(String(256), nullable=False)
 
     def __init__(self,
+                 screen_name: str,
                  status_count: int,
-                 favourite_count: int,
+                 favorite_count: int,
                  media_count: int,
                  following_count: int,
                  followers_count: int,
                  registered_at: str):
         # self.id = id
+        self.screen_name = screen_name
         self.status_count = status_count
-        self.favourite_count = favourite_count
+        self.favorite_count = favorite_count
         self.media_count = media_count
         self.following_count = following_count
         self.followers_count = followers_count
@@ -375,15 +379,17 @@ class Metric(Base):
     def create(self, args_dict: dict) -> Self:
         match args_dict:
             case {
+                "screen_name": screen_name,
                 "status_count": status_count,
-                "favourite_count": favourite_count,
+                "favorite_count": favorite_count,
                 "media_count": media_count,
                 "following_count": following_count,
                 "followers_count": followers_count,
                 "registered_at": registered_at,
             }:
-                return Metric(status_count,
-                              favourite_count,
+                return Metric(screen_name,
+                              status_count,
+                              favorite_count,
                               media_count,
                               following_count,
                               followers_count,
@@ -399,8 +405,9 @@ class Metric(Base):
 
     def to_dict(self) -> dict:
         return {
+            "screen_name": self.screen_name,
             "status_count": self.status_count,
-            "favourite_count": self.favourite_count,
+            "favorite_count": self.favorite_count,
             "media_count": self.media_count,
             "following_count": self.following_count,
             "followers_count": self.followers_count,
@@ -457,7 +464,7 @@ if __name__ == "__main__":
 
     metric_dict_list = [{
         "status_count": int(i * 10),
-        "favourite_count": int(i * 10),
+        "favorite_count": int(i * 10),
         "media_count": int(i * 10),
         "following_count": int(i * 10),
         "followers_count": int(i * 10),

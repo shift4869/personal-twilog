@@ -453,8 +453,9 @@ class TimelineCrawler():
             if target_screen_name != user_legacy.get("screen_name"):
                 continue
             metric_dict = {
+                "screen_name": user_legacy.get("screen_name", ""),
                 "status_count": user_legacy.get("statuses_count", -1),
-                "favourite_count": user_legacy.get("favourites_count", -1),
+                "favorite_count": user_legacy.get("favourites_count", -1),
                 "media_count": user_legacy.get("media_count", -1),
                 "following_count": user_legacy.get("friends_count", -1),
                 "followers_count": user_legacy.get("followers_count", -1),
