@@ -175,7 +175,7 @@ class TimelineCrawler():
         match tweet:
             case {
                 "legacy": {
-                    "retweeted": True,
+                    # "retweeted": True,
                     "retweeted_status_result": {
                         "result": tweet_result,
                     },
@@ -186,9 +186,9 @@ class TimelineCrawler():
         # 引用RTしているツイートの場合
         match tweet:
             case {
-                "legacy": {
-                    "is_quote_status": True,
-                },
+                # "legacy": {
+                #     "is_quote_status": True,
+                # },
                 "quoted_status_result": {
                     "result": tweet_result,
                 },
@@ -199,7 +199,7 @@ class TimelineCrawler():
         match tweet:
             case {
                 "legacy": {
-                    "retweeted": True,
+                    # "retweeted": True,
                     "retweeted_status_result": {
                         "result": {
                             "rest_id": _,
@@ -244,11 +244,12 @@ class TimelineCrawler():
         """tweet_list を平滑化する
 
             ここでの"平滑化"とは tweet_list に含まれる
-            RT と QT の tweet 辞書を元の tweet と同じ階層のリストに格納することを指す
+            RT と QT の tweet 辞書を元の tweet とともにリストに格納することを指す
             元のツイート, RT先ツイート, QT先ツイート があるため、
             1つのツイートは最大で3レコードに増える
             このメソッドの返り値は、RT と QT の階層を気にせずに
             線形探索ができることが保証される
+            また appeared_at の項目もここで設定する
 
         Args:
             tweet_list (list[dict]):
@@ -266,6 +267,7 @@ class TimelineCrawler():
                 # 辞書構造が異なる場合がある？
                 # 閲覧アカウントを制限しているツイート？
                 tweet = tweet.get("tweet", {})
+            # RT先ツイート, QT先ツイートを取得する
             retweet_tweet, quote_tweet = self._match_rt_quote(tweet)
 
             # 元ツイートの appeared_at は created_at と同じ
