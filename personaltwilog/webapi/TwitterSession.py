@@ -2,23 +2,22 @@
 import asyncio
 import json
 import re
-import sys
 from dataclasses import dataclass
 from logging import INFO, getLogger
 from pathlib import Path
-from time import sleep
 from typing import ClassVar, Self
 
 import pyppeteer
 import requests
 import requests.cookies
+from bs4 import Tag
 from requests.models import Request, Response
-from requests_html import HTML, AsyncHTMLSession, Element
+from requests_html import AsyncHTMLSession
 
-from .TwitterAPIEndpoint import TwitterAPIEndpoint
-from .value_object.BearerToken import BearerToken
-from .value_object.Cookies import Cookies
-from .value_object.LocalStorage import LocalStorage
+from personaltwilog.webapi.TwitterAPIEndpoint import TwitterAPIEndpoint
+from personaltwilog.webapi.value_object.BearerToken import BearerToken
+from personaltwilog.webapi.value_object.Cookies import Cookies
+from personaltwilog.webapi.value_object.LocalStorage import LocalStorage
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -101,7 +100,7 @@ class TwitterSession():
         url = self.TOP_URL
         response: Response = self.page_get(url)
         response.raise_for_status()
-        html: HTML = response.html
+        html: Tag = response.html
 
         # 取得結果の確認
         try:
@@ -110,7 +109,7 @@ class TwitterSession():
             # img_tags: list[Element] = div_tag.find("img")
             # result = [self.screen_name == it.attrs.get("alt", "") for it in img_tags]
             # return any(result)
-            a_tags: list[Element] = html.find("a")
+            a_tags: list[Tag] = html.find("a")
             a_tag = [dt for dt in a_tags if "プロフィール" in dt.attrs.get("aria-label", "")][0]
             return "/" + self.screen_name == a_tag.attrs.get("href", "")
         except Exception as e:
@@ -592,8 +591,8 @@ if __name__ == "__main__":
     config.read(CONFIG_FILE_NAME, encoding="utf8")
 
     try:
-        screen_name = config["twitter"]["screen_name"]
-        twitter_session = TwitterSession.create(screen_name)
+        authorize_screen_name = config["twitter"]["authorize_screen_name"]
+        twitter_session = TwitterSession.create(authorize_screen_name)
         # response = twitter_session.prepare()
         response = twitter_session.update_webapi_endpoint()
         print(response)

@@ -14,6 +14,9 @@ logger.setLevel(INFO)
 if __name__ == "__main__":
     HORIZONTAL_LINE = "-" * 80
     logger.info(HORIZONTAL_LINE)
-    crawler = TimelineCrawler()
-    crawler.run()
+    try:
+        crawler = TimelineCrawler()
+        crawler.run()
+    except Exception as e:
+        logger.exception(e)
     logger.info(HORIZONTAL_LINE)
