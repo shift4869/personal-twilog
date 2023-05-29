@@ -267,6 +267,9 @@ class TimelineCrawler():
                 # 辞書構造が異なる場合がある？
                 # 閲覧アカウントを制限しているツイート？
                 tweet = tweet.get("tweet", {})
+            if tweet.get("__typename", "") == "TweetTombstone":
+                # 削除されたツイート
+                continue
             # RT先ツイート, QT先ツイートを取得する
             retweet_tweet, quote_tweet = self._match_rt_quote(tweet)
 
@@ -296,6 +299,9 @@ class TimelineCrawler():
                 appeared_at = tweet.get("appeared_at", "")
                 tweet = tweet.get("tweet", {})
                 tweet["appeared_at"] = appeared_at
+            if tweet.get("__typename", "") == "TweetTombstone":
+                # 削除されたツイート
+                continue
             match tweet:
                 case {
                     "core": {

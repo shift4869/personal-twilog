@@ -83,6 +83,7 @@ class TwitterAPI():
             "responsive_web_graphql_exclude_directive_enabled": True,
             "responsive_web_graphql_skip_user_profile_image_extensions_enabled": False,
             "responsive_web_graphql_timeline_navigation_enabled": True,
+            "subscriptions_verification_info_verified_since_enabled": False,
             "verified_phone_label_enabled": False,
         }
         features_str = json.dumps(features_dict, separators=(",", ":"))

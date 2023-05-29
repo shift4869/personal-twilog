@@ -217,5 +217,5 @@ if __name__ == "__main__":
         pprint.pprint(f"{name.name}")
     # TwitterAPIEndpoint.load()
     # pprint.pprint(TwitterAPIEndpoint.setting_dict)
-    url = TwitterAPIEndpoint.make_url(TwitterAPIEndpointName.GET_MUTE_KEYWORD_LIST)
+    url = TwitterAPIEndpoint.make_url(TwitterAPIEndpointName.TIMELINE_TWEET)
     pprint.pprint(url)
