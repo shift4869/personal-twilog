@@ -31,7 +31,6 @@ class TwitterAPI():
     @property
     def common_features(self):
         features_dict = {
-            "blue_business_profile_image_shape_enabled": True,
             "creator_subscriptions_tweet_preview_api_enabled": False,
             "freedom_of_speech_not_reach_fetch_enabled": False,
             "graphql_is_translatable_rweb_tweet_is_translatable_enabled": True,
@@ -51,7 +50,6 @@ class TwitterAPI():
             "tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled": False,
             "tweetypie_unmention_optimization_enabled": True,
             "verified_phone_label_enabled": False,
-            "vibe_api_enabled": True,
             "view_counts_everywhere_api_enabled": True,
         }
         return features_dict
@@ -77,8 +75,8 @@ class TwitterAPI():
         logger.info(f"GET user by screen_name, target user is '{screen_name}' -> start")
         url = TwitterAPIEndpoint.make_url(TwitterAPIEndpointName.USER_LOOKUP_BY_USERNAME)
         features_dict = {
-            "blue_business_profile_image_shape_enabled": True,
             "creator_subscriptions_tweet_preview_api_enabled": False,
+            "hidden_profile_likes_enabled": True,
             "highlights_tweets_tab_ui_enabled": False,
             "responsive_web_graphql_exclude_directive_enabled": True,
             "responsive_web_graphql_skip_user_profile_image_extensions_enabled": False,
