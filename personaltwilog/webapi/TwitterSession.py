@@ -416,13 +416,13 @@ class TwitterSession():
     async def _get_webapi_endpoint(self) -> str:
         """webapi のエンドポイントを取得する"""
         result: str = ""
-        self.api_endpoint_js_url = ""
+        self.api_endpoint_js_url_list: list[str] = []
 
         async def _response_listener(r: Response) -> None:
             url = r.url
-            pattern = "^(.*)api\.[0-9a-zA-Z]*\.js$"
+            pattern = "^(.*)(api|main)\.[0-9a-zA-Z]*\.js$"
             if re.findall(pattern, url):
-                self.api_endpoint_js_url = url
+                self.api_endpoint_js_url_list.append(url)
 
         browser = self.session._browser
         page = await browser.newPage()
@@ -441,12 +441,13 @@ class TwitterSession():
         )
 
         await page.waitFor(3000)
-        if self.api_endpoint_js_url == "":
+        if not self.api_endpoint_js_url_list:
             # エラー
             return ""
 
-        response = await self.session.get(self.api_endpoint_js_url, headers=self.headers)
-        result = response.text
+        for api_endpoint_js_url in self.api_endpoint_js_url_list:
+            response = await self.session.get(api_endpoint_js_url, headers=self.headers)
+            result += response.text
         return result
 
     def update_webapi_endpoint(self) -> list[dict]:
@@ -484,8 +485,12 @@ class TwitterSession():
         webapi_query_list = {}
         for webapi_endpoint in webapi_endpoint_list:
             key = webapi_endpoint.get("operationName")
-            value = webapi_endpoint.get("queryId")
-            webapi_query_list[key] = value
+            query_id = webapi_endpoint.get("queryId")
+            features = webapi_endpoint.get("metadata", {}).get("featureSwitches", [])
+            webapi_query_list[key] = {
+                "query_id": query_id,
+                "features": sorted(features),
+            }
 
         new_endpoint_list = []
         is_graphql_query_id_list = []
@@ -500,7 +505,8 @@ class TwitterSession():
                 continue
             old_query_id, query_name = match_tuples[0]
             if query_name in webapi_query_list:
-                new_query_id = webapi_query_list.get(query_name)
+                new_query_id = webapi_query_list.get(query_name).get("query_id")
+                new_features = webapi_query_list.get(query_name).get("features")
                 if old_query_id == new_query_id:
                     new_endpoint_list.append(old_endpoint_dict)
                     is_graphql_query_id_list.append(False)
@@ -510,7 +516,8 @@ class TwitterSession():
                     "method": old_endpoint_dict.get("method"),
                     "path_params_num": int(old_endpoint_dict.get("path_params_num")),
                     "template": f"https://twitter.com/i/api/graphql/{new_query_id}/{query_name}",
-                    "url": f"https://twitter.com/i/api/graphql/{new_query_id}/{query_name}"
+                    "url": f"https://twitter.com/i/api/graphql/{new_query_id}/{query_name}",
+                    "features": new_features,
                 }
                 new_endpoint_list.append(r)
                 is_graphql_query_id_list.append(True)

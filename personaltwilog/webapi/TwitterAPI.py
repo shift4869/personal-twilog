@@ -34,7 +34,6 @@ class TwitterAPI():
             "creator_subscriptions_tweet_preview_api_enabled": False,
             "freedom_of_speech_not_reach_fetch_enabled": False,
             "graphql_is_translatable_rweb_tweet_is_translatable_enabled": True,
-            "interactive_text_enabled": True,
             "longform_notetweets_consumption_enabled": True,
             "longform_notetweets_inline_media_enabled": True,
             "longform_notetweets_rich_text_read_enabled": True,
@@ -43,7 +42,6 @@ class TwitterAPI():
             "responsive_web_graphql_exclude_directive_enabled": True,
             "responsive_web_graphql_skip_user_profile_image_extensions_enabled": False,
             "responsive_web_graphql_timeline_navigation_enabled": True,
-            "responsive_web_text_conversations_enabled": False,
             "rweb_lists_timeline_redesign_enabled": False,
             "standardized_nudges_misinfo": True,
             "tweet_awards_web_tipping_enabled": False,
@@ -53,6 +51,50 @@ class TwitterAPI():
             "view_counts_everywhere_api_enabled": True,
         }
         return features_dict
+
+    def _adjust_features(self, estimate_features_dict: dict, expect_features_list: list[str]) -> dict:
+        """変動する graphql のパラメータである features の差分を検知して、必要なら修正する
+
+        Notes:
+            必要な features が含まれていない場合、デフォルト値 DEFAULT_PARAMS_VALUE で設定する
+            不要な features が含まれている場合、除外する
+
+        Args:
+            estimate_features_dict (dict): コード記載時に想定した features の辞書
+                {
+                    "key": bool
+                }
+            expect_features_list (list[str]): graphql のエンドポイント一覧問い合わせで取得した、
+                                              本来送るべき features のkey一覧
+
+        Returns:
+            dict: 今回送るべき features の辞書
+        """
+        DEFAULT_PARAMS_VALUE = False
+        result_dict = dict(estimate_features_dict)
+        estimate_features_list = list(estimate_features_dict.keys())
+        expect_features_list = list(expect_features_list)
+
+        estimate_features_set = set(estimate_features_list)
+        expect_features_set = set(expect_features_list)
+
+        diff_necessary = expect_features_set - estimate_features_set
+        diff_extra = estimate_features_set - expect_features_set
+        if diff_necessary or diff_extra:
+            logger.warning(f"features is not expected.")
+            if diff_necessary:
+                # 必要なパラメータが含まれていない場合、デフォルト値で設定する
+                logger.warning(f"features is not include necessary one.")
+                for d in diff_necessary:
+                    result_dict[d] = DEFAULT_PARAMS_VALUE
+                    logger.warning(f'\t"{d}" is set to {DEFAULT_PARAMS_VALUE}.')
+            if diff_extra:
+                # 不要なパラメータが含まれている場合、削除する
+                logger.warning(f"features is include unnecessary one.")
+                for d in diff_extra:
+                    del result_dict[d]
+                    logger.warning(f'\t"{d}" is removed.')
+        return result_dict
 
     def _get_user_id(self, screen_name):
         if not hasattr(self, "_id_name_dict"):
@@ -74,6 +116,7 @@ class TwitterAPI():
     def lookup_user_by_screen_name(self, screen_name: str) -> dict:
         logger.info(f"GET user by screen_name, target user is '{screen_name}' -> start")
         url = TwitterAPIEndpoint.make_url(TwitterAPIEndpointName.USER_LOOKUP_BY_USERNAME)
+        expect_endpoint_features = TwitterAPIEndpoint.get_features(TwitterAPIEndpointName.USER_LOOKUP_BY_USERNAME)
         features_dict = {
             "creator_subscriptions_tweet_preview_api_enabled": False,
             "hidden_profile_likes_enabled": True,
@@ -84,6 +127,7 @@ class TwitterAPI():
             "subscriptions_verification_info_verified_since_enabled": False,
             "verified_phone_label_enabled": False,
         }
+        features_dict = self._adjust_features(features_dict, expect_endpoint_features)
         features_str = json.dumps(features_dict, separators=(",", ":"))
 
         variables_dict = {
@@ -230,7 +274,9 @@ class TwitterAPI():
         logger.info(f"GET user timeline, target user is '{screen_name}' -> start")
         result = []
         url = TwitterAPIEndpoint.make_url(TwitterAPIEndpointName.TIMELINE_TWEET)
+        expect_endpoint_features = TwitterAPIEndpoint.get_features(TwitterAPIEndpointName.TIMELINE_TWEET)
         features_dict = self.common_features
+        features_dict = self._adjust_features(features_dict, expect_endpoint_features)
         features_str = json.dumps(features_dict, separators=(",", ":"))
 
         # user_id 取得
@@ -765,9 +811,6 @@ if __name__ == "__main__":
     # pprint.pprint(len(result))
 
     pprint.pprint("TL 取得")
-    result = twitter.get_user_timeline(twitter.screen_name, 30)
-    save_response(result)
-    pprint.pprint(len(result))
     result = twitter.get_user_timeline(twitter.target_screen_name, 30)
     save_response(result)
     pprint.pprint(len(result))

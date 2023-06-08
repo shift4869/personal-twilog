@@ -62,7 +62,8 @@ class TwitterAPIEndpoint():
                   "method": method,
                   "path_params_num": path_params_num,
                   "template": template,
-                  "url": url}:
+                  "url": url,
+                  "features": features}:
                 if not isinstance(name, str):
                     return False
                 if not isinstance(method, str):
@@ -72,6 +73,10 @@ class TwitterAPIEndpoint():
                 if not isinstance(template, str):
                     return False
                 if not isinstance(url, str):
+                    return False
+                if not isinstance(features, list):
+                    return False
+                if features and not isinstance(features[0], str):
                     return False
                 return True
         return False
@@ -188,6 +193,25 @@ class TwitterAPIEndpoint():
         return res[0]
 
     @classmethod
+    def get_features(cls, name: TwitterAPIEndpointName) -> list[str]:
+        """指定 name を持つ cls.setting_dict["endpoint"]["features"] の要素を返す
+
+        Args:
+            name (TwitterAPIEndpointName): 探索対象の name
+
+        Returns:
+            dict: cls.setting_dict["endpoint"] の要素のうち、"name" が引数と一致する "features" 要素
+                  見つからなかった場合は空リストを返す
+        """
+        if not isinstance(name, TwitterAPIEndpointName):
+            raise ValueError("name must be TwitterAPIEndpointName.")
+        endpoint_list = cls.get_endpoint_list()
+        res = [endpoint for endpoint in endpoint_list if endpoint.get("name", "") == name.name]
+        if not res:
+            return []
+        return res[0].get("features", [])
+
+    @classmethod
     def make_url(cls, name: TwitterAPIEndpointName, *args) -> str:
         """指定 name からエンドポイントURLを返す
 
@@ -215,7 +239,7 @@ if __name__ == "__main__":
     # 存在するAPIエンドポイントをすべて表示
     for name in TwitterAPIEndpointName:
         pprint.pprint(f"{name.name}")
-    # TwitterAPIEndpoint.load()
-    # pprint.pprint(TwitterAPIEndpoint.setting_dict)
-    url = TwitterAPIEndpoint.make_url(TwitterAPIEndpointName.TIMELINE_TWEET)
-    pprint.pprint(url)
+        url = TwitterAPIEndpoint.make_url(name)
+        pprint.pprint(url)
+        features = TwitterAPIEndpoint.get_features(name)
+        pprint.pprint(features)
