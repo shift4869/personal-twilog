@@ -165,11 +165,13 @@ class TwitterAPI():
                 return value
         return ""
 
-    def get_like(self, screen_name: str, limit: int = 300) -> list[dict]:
+    def get_likes(self, screen_name: str, limit: int = 300, min_id: int = -1) -> list[dict]:
         logger.info(f"GET like, target user is '{screen_name}' -> start")
         result = []
         url = TwitterAPIEndpoint.make_url(TwitterAPIEndpointName.LIKED_TWEET)
+        expect_endpoint_features = TwitterAPIEndpoint.get_features(TwitterAPIEndpointName.LIKED_TWEET)
         features_dict = self.common_features
+        features_dict = self._adjust_features(features_dict, expect_endpoint_features)
         features_str = json.dumps(features_dict, separators=(",", ":"))
 
         # user_id 取得
@@ -210,11 +212,22 @@ class TwitterAPI():
                     return tweet_results
             return {}
 
+        def _get_id_str(tweet_results: dict) -> int:
+            match tweet_results:
+                case {
+                    "result": {
+                        "rest_id": id_str
+                    }
+                }:
+                    return int(id_str)
+            return 0
+
         # カーソルページング
+        cur_tweet_id = sys.maxsize
         cursor = ""
         data_list = []
         tweet_list = []
-        while len(tweet_list) <= limit:
+        while len(tweet_list) <= limit and (cur_tweet_id != min_id):
             # カーソル設定
             if cursor == "":
                 if len(data_list) == 0:
@@ -242,9 +255,9 @@ class TwitterAPI():
             if "error" in data_dict:
                 continue
             data_list.append(data_dict)
-            logger.info(f"\tuser like {len(data_list):03} pages fetched.")
+            logger.info(f"\tuser likes {len(data_list):03} pages fetched.")
 
-            # 辞書パースしてカーソルを取得、結果の要素を格納
+            # 辞書パース
             prev_tweets_num = len(tweet_list)
             instructions: list[dict] = _get_instructions(data_dict)
             for instruction in instructions:
@@ -252,13 +265,20 @@ class TwitterAPI():
                 if not entries:
                     continue
                 for entry in entries:
+                    # ツイート情報部分取得
                     tweet_results = _get_tweet_results(entry)
                     if tweet_results:
                         tweet_list.append(tweet_results)
-                for entry in entries:
+                    # カーソル取得
                     cursor = self._get_cursor(entry)
-                    if cursor != "":
-                        break
+                    # min_id が指定されている場合
+                    if min_id > -1:
+                        # 現在の id_str を取得して min_id と一致していたら取得を打ち切る
+                        tweet_id = _get_id_str(tweet_results)
+                        if tweet_id > 0:
+                            cur_tweet_id = tweet_id
+                        if cur_tweet_id == min_id:
+                            break
             now_tweets_num = len(tweet_list)
 
             if prev_tweets_num == now_tweets_num:
@@ -805,16 +825,16 @@ if __name__ == "__main__":
     # save_response(result)
     # pprint.pprint(len(result))
 
-    # pprint.pprint("like 取得")
-    # result = twitter.get_like(twitter.screen_name, 10)
-    # save_response(result)
-    # pprint.pprint(len(result))
+    pprint.pprint("like 取得")
+    result = twitter.get_likes(twitter.target_screen_name, 10)
+    save_response(result)
+    pprint.pprint(len(result))
+    exit(0)
 
     pprint.pprint("TL 取得")
     result = twitter.get_user_timeline(twitter.target_screen_name, 30)
     save_response(result)
     pprint.pprint(len(result))
-    exit(0)
 
     pprint.pprint("ツイート投稿")
     result = twitter.post_tweet("test")

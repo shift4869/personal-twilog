@@ -13,6 +13,7 @@ from pathlib import Path
 import requests
 
 from personaltwilog.db.ExternalLinkDB import ExternalLinkDB
+from personaltwilog.db.LikesDB import LikesDB
 from personaltwilog.db.MediaDB import MediaDB
 from personaltwilog.db.MetricDB import MetricDB
 from personaltwilog.db.TweetDB import TweetDB
@@ -41,10 +42,13 @@ class TimelineCrawler():
         else:
             self.twitter = None
         self.tweet_db = TweetDB()
+        self.likes_db = LikesDB()
         self.media_db = MediaDB()
         self.metric_db = MetricDB()
         self.external_link_db = ExternalLinkDB()
-        self.registered_at = ""
+
+        # 各DBで共通に使う registered_at を取得
+        self.registered_at = datetime.now().replace(microsecond=0).isoformat()
         logger.info("TimelineCrawler init -> done")
 
     def _get_external_link_type(self, external_link_url: str) -> str:
@@ -509,16 +513,16 @@ class TimelineCrawler():
             return [metric_dict]
         return []
 
-    def run(self):
-        logger.info("TimelineCrawler run -> start")
-        logger.info("TimelineCrawler run init -> start")
+    def timeline_crawl(self):
+        logger.info("TimelineCrawler timeline_crawl -> start")
+        logger.info("TimelineCrawler timeline_crawl init -> start")
         # 探索する screen_name を設定
         screen_name = self.target_screen_name
         # 探索する id_str の下限値を設定
         min_id = self.tweet_db.select_for_max_id(screen_name)
         logger.info(f"Target timeline's screen_name is '{screen_name}'.")
         logger.info(f"Last registered tweet_id is '{min_id}'.")
-        logger.info("TimelineCrawler run init -> done")
+        logger.info("TimelineCrawler timeline_crawl init -> done")
 
         # TL取得
         logger.info(f"Getting timeline of '{screen_name}' -> start")
@@ -537,7 +541,7 @@ class TimelineCrawler():
         if not tweet_list:
             logger.info(f"Getting timeline of '{screen_name}' -> done")
             logger.info(f"No new tweet of '{screen_name}'.")
-            logger.info("TimelineCrawler run -> done")
+            logger.info("TimelineCrawler timeline_crawl -> done")
             return []
         logger.info(f"Number of new tweet of '{screen_name}' is {len(tweet_list)}.")
         logger.info(f"Getting timeline of '{screen_name}' -> done")
@@ -546,9 +550,6 @@ class TimelineCrawler():
         logger.info("Flattened -> start")
         flattened_tweet_list = self._flatten(tweet_list)
         logger.info("Flattened -> done")
-
-        # 各DBで共通に使う registered_at を取得
-        self.registered_at = datetime.now().replace(microsecond=0).isoformat()
 
         # Tweet
         logger.info("Tweet table update -> start")
@@ -592,8 +593,99 @@ class TimelineCrawler():
         self.metric_db.upsert(metric_dict_list)
         logger.info("Metric table update -> done")
 
-        logger.info("TimelineCrawler run -> done")
+        logger.info("TimelineCrawler timeline_crawl -> done")
         return flattened_tweet_list
+
+    def likes_crawl(self):
+        logger.info("TimelineCrawler likes_crawl -> start")
+        logger.info("TimelineCrawler likes_crawl init -> start")
+        # 探索する screen_name を設定
+        screen_name = self.target_screen_name
+        # 探索する id_str の下限値を設定
+        min_id = self.likes_db.select_for_max_id(screen_name)
+        logger.info(f"Target Likes's screen_name is '{screen_name}'.")
+        logger.info(f"Last registered tweet_id is '{min_id}'.")
+        logger.info("TimelineCrawler likes_crawl init -> done")
+
+        # Likes 取得
+        logger.info(f"Getting Likes of '{screen_name}' -> start")
+        limit = 300
+        tweet_list = []
+        if self.twitter:
+            tweet_list = self.twitter.get_likes(screen_name, limit, min_id)
+            tweet_list = tweet_list[:-1]
+            if tweet_list:
+                with Path(TimelineCrawler.CACHE_FILE_PATH).open("w", encoding="utf8") as fout:
+                    json.dump(tweet_list, fout, indent=4, ensure_ascii=False)
+        else:
+            with Path(TimelineCrawler.CACHE_FILE_PATH).open("r", encoding="utf8") as fout:
+                tweet_list = json.load(fout)
+
+        if not tweet_list:
+            logger.info(f"Getting Likes of '{screen_name}' -> done")
+            logger.info(f"No new tweet of '{screen_name}'.")
+            logger.info("TimelineCrawler likes_crawl -> done")
+            return []
+        logger.info(f"Number of new tweet of '{screen_name}' is {len(tweet_list)}.")
+        logger.info(f"Getting Likes of '{screen_name}' -> done")
+
+        # 平滑化
+        logger.info("Flattened -> start")
+        flattened_tweet_list = self._flatten(tweet_list)
+        logger.info("Flattened -> done")
+
+        # Likes
+        logger.info("Likes table update -> start")
+        tweet_dict_list = self._interporate_to_tweet(flattened_tweet_list)
+        seen = []
+        tweet_dict_list = [
+            tweet_dict for tweet_dict in tweet_dict_list
+            if (tweet_id := tweet_dict.get("tweet_id", "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
+        ]
+        tweet_dict_list.reverse()
+        self.likes_db.upsert(tweet_dict_list)
+        logger.info("Likes table update -> done")
+
+        # Media
+        logger.info("Media table update -> start")
+        media_dict_list = self._interporate_to_media(flattened_tweet_list)
+        seen = []
+        media_dict_list = [
+            r for r in media_dict_list
+            if (tweet_id := r.get("tweet_id", "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
+        ]
+        media_dict_list.reverse()
+        self.media_db.upsert(media_dict_list)
+        logger.info("Media table update -> done")
+
+        # ExternalLink
+        logger.info("ExternalLink table update -> start")
+        external_link_dict_list = self._interporate_to_external_link(flattened_tweet_list)
+        seen = []
+        external_link_dict_list = [
+            r for r in external_link_dict_list
+            if (tweet_id := r.get("tweet_id", "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
+        ]
+        external_link_dict_list.reverse()
+        self.external_link_db.upsert(external_link_dict_list)
+        logger.info("ExternalLink table update -> done")
+
+        # Metric
+        # logger.info("Metric table update -> start")
+        # metric_dict_list = self._interporate_to_metric(flattened_tweet_list)
+        # self.metric_db.upsert(metric_dict_list)
+        # logger.info("Metric table update -> done")
+
+        logger.info("TimelineCrawler likes_crawl -> done")
+        return flattened_tweet_list
+
+    def run(self):
+        logger.info("-----")
+        logger.info("TimelineCrawler run -> start")
+        self.timeline_crawl()
+        logger.info("-----")
+        self.likes_crawl()
+        logger.info("TimelineCrawler run -> done")
 
 
 if __name__ == "__main__":
@@ -606,4 +698,6 @@ if __name__ == "__main__":
         getLogger(name).disabled = True
 
     crawler = TimelineCrawler()
-    crawler.run()
+    # crawler.run()
+    # crawler.timeline_crawl()
+    crawler.likes_crawl()

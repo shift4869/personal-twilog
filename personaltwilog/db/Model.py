@@ -153,6 +153,150 @@ class Tweet(Base):
         }
 
 
+class Likes(Base):
+    """Likes モデル
+        [id] INTEGER NOT NULL UNIQUE,
+        [tweet_id] TEXT NOT NULL,
+        [tweet_text] TEXT,
+        [tweet_via] TEXT,
+        [tweet_url] TEXT NOT NULL,
+        [user_id] TEXT NOT NULL,
+        [user_name] TEXT NOT NULL,
+        [screen_name] TEXT NOT NULL,
+        [is_retweet] Boolean,
+        [retweet_tweet_id] TEXT,
+        [is_quote] Boolean,
+        [quote_tweet_id] TEXT,
+        [has_media] Boolean,
+        [has_external_link] Boolean,
+        [created_at] TEXT NOT NULL,
+        [appeared_at] TEXT NOT NULL,
+        [registered_at] TEXT NOT NULL,
+        PRIMARY KEY([id])
+    """
+
+    __tablename__ = "Likes"
+
+    id = Column(Integer, primary_key=True)
+    tweet_id = Column(String(256), nullable=False, unique=True)
+    tweet_text = Column(String(256))
+    tweet_via = Column(String(256))
+    tweet_url = Column(String(256), nullable=False)
+    user_id = Column(String(256), nullable=False)
+    user_name = Column(String(256), nullable=False)
+    screen_name = Column(String(256), nullable=False)
+    is_retweet = Column(Boolean(), nullable=False)
+    retweet_tweet_id = Column(String(256))
+    is_quote = Column(Boolean(), nullable=False)
+    quote_tweet_id = Column(String(256))
+    has_media = Column(Boolean(), nullable=False)
+    has_external_link = Column(Boolean(), nullable=False)
+    created_at = Column(String(256), nullable=False)
+    appeared_at = Column(String(256), nullable=False)
+    registered_at = Column(String(256), nullable=False)
+
+    def __init__(self,
+                 tweet_id: str,
+                 tweet_text: str,
+                 tweet_via: str,
+                 tweet_url: str,
+                 user_id: str,
+                 user_name: str,
+                 screen_name: str,
+                 is_retweet: bool,
+                 retweet_tweet_id: str,
+                 is_quote: bool,
+                 quote_tweet_id: str,
+                 has_media: bool,
+                 has_external_link: bool,
+                 created_at: str,
+                 appeared_at: str,
+                 registered_at: str):
+        # self.id = id
+        self.tweet_id = tweet_id
+        self.tweet_text = tweet_text
+        self.tweet_via = tweet_via
+        self.tweet_url = tweet_url
+        self.user_id = user_id
+        self.user_name = user_name
+        self.screen_name = screen_name
+        self.is_retweet = is_retweet
+        self.retweet_tweet_id = retweet_tweet_id
+        self.is_quote = is_quote
+        self.quote_tweet_id = quote_tweet_id
+        self.has_media = has_media
+        self.has_external_link = has_external_link
+        self.created_at = created_at
+        self.appeared_at = appeared_at
+        self.registered_at = registered_at
+
+    @classmethod
+    def create(self, args_dict: dict) -> Self:
+        match args_dict:
+            case {
+                "tweet_id": tweet_id,
+                "tweet_text": tweet_text,
+                "tweet_via": tweet_via,
+                "tweet_url": tweet_url,
+                "user_id": user_id,
+                "user_name": user_name,
+                "screen_name": screen_name,
+                "is_retweet": is_retweet,
+                "retweet_tweet_id": retweet_tweet_id,
+                "is_quote": is_quote,
+                "quote_tweet_id": quote_tweet_id,
+                "has_media": has_media,
+                "has_external_link": has_external_link,
+                "created_at": created_at,
+                "appeared_at": appeared_at,
+                "registered_at": registered_at,
+            }:
+                return Likes(tweet_id,
+                             tweet_text,
+                             tweet_via,
+                             tweet_url,
+                             user_id,
+                             user_name,
+                             screen_name,
+                             is_retweet,
+                             retweet_tweet_id,
+                             is_quote,
+                             quote_tweet_id,
+                             has_media,
+                             has_external_link,
+                             created_at,
+                             appeared_at,
+                             registered_at)
+            case _:
+                raise ValueError("Unmatch args_dict.")
+
+    def __repr__(self):
+        return f"<Likes(id='{self.tweet_id}', screen_name='{self.screen_name}')>"
+
+    def __eq__(self, other):
+        return isinstance(other, Likes) and other.tweet_id == self.tweet_id
+
+    def to_dict(self) -> dict:
+        return {
+            "tweet_id": self.tweet_id,
+            "tweet_text": self.tweet_text,
+            "tweet_via": self.tweet_via,
+            "tweet_url": self.tweet_url,
+            "user_id": self.user_id,
+            "user_name": self.user_name,
+            "screen_name": self.screen_name,
+            "is_retweet": self.is_retweet,
+            "retweet_tweet_id": self.retweet_tweet_id,
+            "is_quote": self.is_quote,
+            "quote_tweet_id": self.quote_tweet_id,
+            "has_media": self.has_media,
+            "has_external_link": self.has_external_link,
+            "created_at": self.created_at,
+            "appeared_at": self.appeared_at,
+            "registered_at": self.registered_at,
+        }
+
+
 class Media(Base):
     """メディアモデル
         [id] INTEGER NOT NULL UNIQUE,
