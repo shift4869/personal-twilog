@@ -602,7 +602,7 @@ class TimelineCrawler():
         # 探索する screen_name を設定
         screen_name = self.target_screen_name
         # 探索する id_str の下限値を設定
-        min_id = self.likes_db.select_for_max_id(screen_name)
+        min_id = self.likes_db.select_for_max_id()
         logger.info(f"Target Likes's screen_name is '{screen_name}'.")
         logger.info(f"Last registered tweet_id is '{min_id}'.")
         logger.info("TimelineCrawler likes_crawl init -> done")
@@ -680,11 +680,12 @@ class TimelineCrawler():
         return flattened_tweet_list
 
     def run(self):
-        logger.info("-----")
         logger.info("TimelineCrawler run -> start")
+        logger.info("-----")
         self.timeline_crawl()
         logger.info("-----")
         self.likes_crawl()
+        logger.info("-----")
         logger.info("TimelineCrawler run -> done")
 
 

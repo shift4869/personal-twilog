@@ -18,14 +18,12 @@ class LikesDB(Base):
         session.close()
         return result
 
-    def select_for_max_id(self, screen_name) -> int:
+    def select_for_max_id(self) -> int:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
-        r = session.query(
-            func.max(Likes.tweet_id).filter(Likes.screen_name == screen_name).label("max_id_str")
-        ).one()
+        r = session.query(Likes).order_by(Likes.id.desc()).first()
         session.close()
-        result = r.max_id_str or 0
+        result = r.tweet_id or 0
         return int(result)
 
     def upsert(self, record: Likes | list[dict]) -> list[int]:
