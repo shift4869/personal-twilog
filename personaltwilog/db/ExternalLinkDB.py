@@ -2,7 +2,7 @@
 import re
 from typing import Self
 
-from sqlalchemy import asc, or_
+from sqlalchemy import and_, asc, or_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
@@ -48,7 +48,9 @@ class ExternalLinkDB(Base):
 
         for r in record_list:
             try:
-                q = session.query(ExternalLink).filter(ExternalLink.registered_at == r.registered_at).with_for_update()
+                q = session.query(ExternalLink).filter(
+                    and_(ExternalLink.tweet_id == r.tweet_id, ExternalLink.registered_at == r.registered_at)
+                ).with_for_update()
                 p = q.one()
             except NoResultFound:
                 # INSERT
