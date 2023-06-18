@@ -60,7 +60,7 @@ class LikesDB(Base):
                 result.append(0)
             else:
                 # UPDATE
-                # id以外を更新する
+                # idと日付関係以外を更新する
                 p.tweet_id = r.tweet_id
                 p.tweet_text = r.tweet_text
                 p.tweet_via = r.tweet_via
@@ -73,9 +73,9 @@ class LikesDB(Base):
                 p.is_quote = r.is_quote
                 p.quote_tweet_id = r.quote_tweet_id
                 p.has_media = r.has_media
-                p.created_at = r.created_at
-                p.appeared_at = r.appeared_at
-                p.registered_at = r.registered_at
+                # p.created_at = r.created_at
+                # p.appeared_at = r.appeared_at
+                # p.registered_at = r.registered_at
                 result.append(1)
 
         session.commit()

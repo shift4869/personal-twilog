@@ -56,13 +56,13 @@ class MetricDB(Base):
                 result.append(0)
             else:
                 # UPDATE
-                # id以外を更新する
+                # idと日付関係以外を更新する
                 p.status_count = r.status_count,
                 p.favorite_count = r.favorite_count,
                 p.media_count = r.media_count,
                 p.following_count = r.following_count,
                 p.followers_count = r.followers_count,
-                p.registered_at = r.registered_at
+                # p.registered_at = r.registered_at
                 result.append(1)
 
         session.commit()

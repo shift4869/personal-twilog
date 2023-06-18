@@ -58,16 +58,16 @@ class MediaDB(Base):
                 result.append(0)
             else:
                 # UPDATE
-                # id以外を更新する
+                # idと日付関係以外を更新する
                 p.tweet_id = r.tweet_id
                 p.media_filename = r.media_filename
                 p.media_url = r.media_url
                 p.media_thumbnail_url = r.media_thumbnail_url
                 p.media_type = r.media_type
                 p.media_size = r.media_size
-                p.created_at = r.created_at
-                p.appeared_at = r.appeared_at
-                p.registered_at = r.registered_at
+                # p.created_at = r.created_at
+                # p.appeared_at = r.appeared_at
+                # p.registered_at = r.registered_at
                 result.append(1)
 
         session.commit()
