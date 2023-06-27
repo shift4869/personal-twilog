@@ -42,6 +42,7 @@ class TwitterAPI():
             "responsive_web_graphql_exclude_directive_enabled": True,
             "responsive_web_graphql_skip_user_profile_image_extensions_enabled": False,
             "responsive_web_graphql_timeline_navigation_enabled": True,
+            "responsive_web_twitter_article_tweet_consumption_enabled": True,
             "rweb_lists_timeline_redesign_enabled": False,
             "standardized_nudges_misinfo": True,
             "tweet_awards_web_tipping_enabled": False,
