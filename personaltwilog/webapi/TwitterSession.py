@@ -477,6 +477,7 @@ class TwitterSession():
                 json_str = json_str.replace("operationType", '"operationType"')
                 json_str = json_str.replace("metadata", '"metadata"')
                 json_str = json_str.replace("featureSwitches", '"featureSwitches"')
+                json_str = json_str.replace("fieldToggles", '"fieldToggles"')
                 json_dict = json.loads("{" + json_str + "}")
                 webapi_endpoint_list.append(json_dict)
         with Path("./config/webapi_endpoint.json").open("w") as fout:
@@ -600,8 +601,9 @@ if __name__ == "__main__":
     try:
         authorize_screen_name = config["twitter"]["authorize_screen_name"]
         twitter_session = TwitterSession.create(authorize_screen_name)
-        # response = twitter_session.prepare()
         response = twitter_session.update_webapi_endpoint()
+        print(response)
+        response = twitter_session.prepare()
         print(response)
 
         # sleep(10)

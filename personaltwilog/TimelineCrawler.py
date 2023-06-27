@@ -699,6 +699,6 @@ if __name__ == "__main__":
         getLogger(name).disabled = True
 
     crawler = TimelineCrawler()
-    # crawler.run()
+    crawler.run()
     # crawler.timeline_crawl()
-    crawler.likes_crawl()
+    # crawler.likes_crawl()
