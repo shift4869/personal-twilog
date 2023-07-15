@@ -42,6 +42,7 @@ class TwitterAPI():
             "responsive_web_graphql_exclude_directive_enabled": True,
             "responsive_web_graphql_skip_user_profile_image_extensions_enabled": False,
             "responsive_web_graphql_timeline_navigation_enabled": True,
+            "responsive_web_media_download_video_enabled": True,
             "responsive_web_twitter_article_tweet_consumption_enabled": True,
             "rweb_lists_timeline_redesign_enabled": False,
             "standardized_nudges_misinfo": True,
@@ -121,6 +122,7 @@ class TwitterAPI():
         features_dict = {
             "creator_subscriptions_tweet_preview_api_enabled": False,
             "hidden_profile_likes_enabled": True,
+            "hidden_profile_subscriptions_enabled": False,
             "highlights_tweets_tab_ui_enabled": False,
             "responsive_web_graphql_exclude_directive_enabled": True,
             "responsive_web_graphql_skip_user_profile_image_extensions_enabled": False,
