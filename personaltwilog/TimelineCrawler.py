@@ -35,10 +35,13 @@ class TimelineCrawler():
             raise IOError
 
         self.config = config
-        self.screen_name = config["twitter"]["authorize_screen_name"]
-        self.target_screen_name = config["twitter"]["target_screen_name"]
+        authorize_screen_name = config["twitter"]["authorize_screen_name"]
+        ct0 = config["twitter_api_client"]["ct0"]
+        auth_token = config["twitter_api_client"]["auth_token"]
+        target_screen_name = config["twitter_api_client"]["target_screen_name"]
+        target_id = config["twitter_api_client"]["target_id"]
         if not DEBUG:
-            self.twitter = TwitterAPI(self.screen_name, self.target_screen_name)
+            self.twitter = TwitterAPI(authorize_screen_name, ct0, auth_token, target_screen_name, target_id)
         else:
             self.twitter = None
         self.tweet_db = TweetDB()
@@ -489,7 +492,7 @@ class TimelineCrawler():
     def _interporate_to_metric(self, flattened_tweet_list: list[dict]) -> list[dict]:
         """flattened_tweet_list を解釈して DB の Metric テーブルに投入するための list[dict] を返す
         """
-        target_screen_name = self.target_screen_name
+        target_screen_name = self.twitter.target_screen_name
         flattened_tweet_list_r = copy.deepcopy(flattened_tweet_list)
         flattened_tweet_list_r.reverse()
         for tweet in flattened_tweet_list_r:
@@ -517,7 +520,7 @@ class TimelineCrawler():
         logger.info("TimelineCrawler timeline_crawl -> start")
         logger.info("TimelineCrawler timeline_crawl init -> start")
         # 探索する screen_name を設定
-        screen_name = self.target_screen_name
+        screen_name = self.twitter.target_screen_name
         # 探索する id_str の下限値を設定
         min_id = self.tweet_db.select_for_max_id(screen_name)
         logger.info(f"Target timeline's screen_name is '{screen_name}'.")
@@ -600,7 +603,7 @@ class TimelineCrawler():
         logger.info("TimelineCrawler likes_crawl -> start")
         logger.info("TimelineCrawler likes_crawl init -> start")
         # 探索する screen_name を設定
-        screen_name = self.target_screen_name
+        screen_name = self.twitter.target_screen_name
         # 探索する id_str の下限値を設定
         min_id = self.likes_db.select_for_max_id()
         logger.info(f"Target Likes's screen_name is '{screen_name}'.")

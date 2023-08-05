@@ -94,7 +94,7 @@ class TwitterSession():
         Returns:
             bool: 正しく following ページが取得できたらTrue, 不正ならFalse
         """
-        STRICT_CHECK = False
+        STRICT_CHECK = True
         if not STRICT_CHECK:
             return True
         url = self.TOP_URL
@@ -350,7 +350,7 @@ class TwitterSession():
             await asyncio.sleep(1)
             pass
 
-        await page.waitForNavigation()
+        await page.waitFor(3000)
 
         # TODO::ツイッターログインが成功かどうか調べる
         content = await page.content()
