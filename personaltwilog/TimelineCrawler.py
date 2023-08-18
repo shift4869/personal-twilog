@@ -324,7 +324,7 @@ class TimelineCrawler():
                 } if l1 != {} and l2 != {} and rest_id != "" and source != "":
                     pass
                 case _:
-                    raise ValueError
+                    raise ValueError("flatten failed. invalid '__typename' or structure.")
             edited_tweet_list.append(tweet)
 
         return edited_tweet_list
