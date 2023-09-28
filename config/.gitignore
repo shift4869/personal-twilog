@@ -1,2 +1,2 @@
 *.json
-!twitter_api_setting.json
+!config_example.json

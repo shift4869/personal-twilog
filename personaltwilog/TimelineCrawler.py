@@ -677,6 +677,12 @@ class TimelineCrawler():
         target_dicts = self.config["target"]  # TODO::authorize複数対応
         for target_dict in target_dicts:
             target_screen_name = target_dict["screen_name"]
+            is_enable = ("enable" == target_dict["status"])
+
+            if not is_enable:
+                logger.info(f"Status is not enable , target screen_name = '{target_screen_name}' -> skip")
+                continue
+
             logger.info("----------")
             self.timeline_crawl(target_screen_name)
             logger.info("-----")

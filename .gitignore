@@ -105,6 +105,7 @@ ENV/
 .vscode
 *.ini
 !config_example.ini
+!config_example.json
 !logging.ini
 !encrypt*.ini
 *.html

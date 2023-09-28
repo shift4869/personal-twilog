@@ -1,0 +1,17 @@
+{
+    "twitter_api_client_list": [
+        {
+            "authorize": {
+                "screen_name": "{screen_name}",
+                "ct0": "{ct0}",
+                "auth_token": "{auth_token}"
+            },
+            "target": [
+                {
+                    "screen_name": "{target_screen_name}",
+                    "status": "{enable/disable}"
+                }
+            ]
+        }
+    ]
+}
