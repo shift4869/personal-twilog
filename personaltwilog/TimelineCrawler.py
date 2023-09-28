@@ -488,21 +488,21 @@ class TimelineCrawler():
         flattened_tweet_list_r = copy.deepcopy(flattened_tweet_list)
         flattened_tweet_list_r.reverse()
         for tweet in flattened_tweet_list_r:
-            user_dict = tweet.get("core", {}) \
-                             .get("user_results", {}) \
-                             .get("result", {})
+            user_dict: dict = tweet.get("core", {}) \
+                                   .get("user_results", {}) \
+                                   .get("result", {})
             if not user_dict:
                 continue
-            user_legacy: dict = user_dict.get("legacy")
+            user_legacy: dict = user_dict.get("legacy", {})
             if target_screen_name != user_legacy.get("screen_name"):
                 continue
             metric_dict = {
-                "screen_name": user_legacy.get("screen_name", ""),
-                "status_count": user_legacy.get("statuses_count", -1),
-                "favorite_count": user_legacy.get("favourites_count", -1),
-                "media_count": user_legacy.get("media_count", -1),
-                "following_count": user_legacy.get("friends_count", -1),
-                "followers_count": user_legacy.get("followers_count", -1),
+                "screen_name": user_legacy["screen_name"],
+                "status_count": user_legacy["statuses_count"],
+                "favorite_count": user_legacy["favourites_count"],
+                "media_count": user_legacy["media_count"],
+                "following_count": user_legacy["friends_count"],
+                "followers_count": user_legacy["followers_count"],
                 "registered_at": self.registered_at,
             }
             return [metric_dict]
