@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from logging import INFO, getLogger
 from pathlib import Path
 
+import orjson
 import requests
 
 from personaltwilog.db.ExternalLinkDB import ExternalLinkDB
@@ -29,19 +30,16 @@ class TimelineCrawler():
 
     def __init__(self) -> None:
         logger.info("TimelineCrawler init -> start")
-        config = configparser.ConfigParser()
-        CONFIG_FILE_NAME = "./config/config.ini"
-        if not config.read(CONFIG_FILE_NAME, encoding="utf8"):
-            raise IOError
+        CONFIG_FILE_NAME = "./config/config.json"
+        config = orjson.loads(Path(CONFIG_FILE_NAME).read_bytes())
 
+        config = config["twitter_api_client_list"][0]  # TODO::authorize複数対応
         self.config = config
-        authorize_screen_name = config["twitter"]["authorize_screen_name"]
-        ct0 = config["twitter_api_client"]["ct0"]
-        auth_token = config["twitter_api_client"]["auth_token"]
-        target_screen_name = config["twitter_api_client"]["target_screen_name"]
-        target_id = config["twitter_api_client"]["target_id"]
+        authorize_screen_name = config["authorize"]["screen_name"]
+        ct0 = config["authorize"]["ct0"]
+        auth_token = config["authorize"]["auth_token"]
         if not DEBUG:
-            self.twitter = TwitterAPI(authorize_screen_name, ct0, auth_token, target_screen_name, target_id)
+            self.twitter = TwitterAPI(authorize_screen_name, ct0, auth_token)
         else:
             self.twitter = None
         self.tweet_db = TweetDB()
@@ -182,7 +180,6 @@ class TimelineCrawler():
         match tweet:
             case {
                 "legacy": {
-                    # "retweeted": True,
                     "retweeted_status_result": {
                         "result": tweet_result,
                     },
@@ -193,9 +190,6 @@ class TimelineCrawler():
         # 引用RTしているツイートの場合
         match tweet:
             case {
-                # "legacy": {
-                #     "is_quote_status": True,
-                # },
                 "quoted_status_result": {
                     "result": tweet_result,
                 },
@@ -206,7 +200,6 @@ class TimelineCrawler():
         match tweet:
             case {
                 "legacy": {
-                    # "retweeted": True,
                     "retweeted_status_result": {
                         "result": {
                             "rest_id": _,
@@ -489,10 +482,9 @@ class TimelineCrawler():
                 external_link_dict_list.append(external_link_dict)
         return external_link_dict_list
 
-    def _interporate_to_metric(self, flattened_tweet_list: list[dict]) -> list[dict]:
+    def _interporate_to_metric(self, flattened_tweet_list: list[dict], target_screen_name: str) -> list[dict]:
         """flattened_tweet_list を解釈して DB の Metric テーブルに投入するための list[dict] を返す
         """
-        target_screen_name = self.twitter.target_screen_name
         flattened_tweet_list_r = copy.deepcopy(flattened_tweet_list)
         flattened_tweet_list_r.reverse()
         for tweet in flattened_tweet_list_r:
@@ -516,11 +508,9 @@ class TimelineCrawler():
             return [metric_dict]
         return []
 
-    def timeline_crawl(self):
+    def timeline_crawl(self, screen_name: str) -> list[dict]:
         logger.info("TimelineCrawler timeline_crawl -> start")
         logger.info("TimelineCrawler timeline_crawl init -> start")
-        # 探索する screen_name を設定
-        screen_name = self.twitter.target_screen_name
         # 探索する id_str の下限値を設定
         min_id = self.tweet_db.select_for_max_id(screen_name)
         logger.info(f"Target timeline's screen_name is '{screen_name}'.")
@@ -592,18 +582,16 @@ class TimelineCrawler():
 
         # Metric
         logger.info("Metric table update -> start")
-        metric_dict_list = self._interporate_to_metric(flattened_tweet_list)
+        metric_dict_list = self._interporate_to_metric(flattened_tweet_list, screen_name)
         self.metric_db.upsert(metric_dict_list)
         logger.info("Metric table update -> done")
 
         logger.info("TimelineCrawler timeline_crawl -> done")
         return flattened_tweet_list
 
-    def likes_crawl(self):
+    def likes_crawl(self, screen_name: str) -> list[dict]:
         logger.info("TimelineCrawler likes_crawl -> start")
         logger.info("TimelineCrawler likes_crawl init -> start")
-        # 探索する screen_name を設定
-        screen_name = self.twitter.target_screen_name
         # 探索する id_str の下限値を設定
         min_id = self.likes_db.select_for_max_id()
         logger.info(f"Target Likes's screen_name is '{screen_name}'.")
@@ -675,7 +663,7 @@ class TimelineCrawler():
 
         # Metric
         # logger.info("Metric table update -> start")
-        # metric_dict_list = self._interporate_to_metric(flattened_tweet_list)
+        # metric_dict_list = self._interporate_to_metric(flattened_tweet_list, screen_name)
         # self.metric_db.upsert(metric_dict_list)
         # logger.info("Metric table update -> done")
 
@@ -684,11 +672,16 @@ class TimelineCrawler():
 
     def run(self):
         logger.info("TimelineCrawler run -> start")
-        logger.info("-----")
-        self.timeline_crawl()
-        logger.info("-----")
-        self.likes_crawl()
-        logger.info("-----")
+        authorize_screen_name = self.twitter.authorize_screen_name.name
+        logger.info(f"Authorize screen_name is '{authorize_screen_name}'.")
+        target_dicts = self.config["target"]  # TODO::authorize複数対応
+        for target_dict in target_dicts:
+            target_screen_name = target_dict["screen_name"]
+            logger.info("----------")
+            self.timeline_crawl(target_screen_name)
+            logger.info("-----")
+            self.likes_crawl(target_screen_name)
+            logger.info("----------")
         logger.info("TimelineCrawler run -> done")
 
 

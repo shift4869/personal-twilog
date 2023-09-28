@@ -5,25 +5,49 @@ from logging import INFO, getLogger
 from pathlib import Path
 from typing import Any
 
+import orjson
 from twitter.scraper import Scraper
+
+from personaltwilog.webapi.valueobject.ScreenName import ScreenName
+from personaltwilog.webapi.valueobject.Token import Token
+from personaltwilog.webapi.valueobject.UserId import UserId
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
 class TwitterAPI():
-    screen_name: str
-    ct0: str
-    auth_token: str
-    target_screen_name: str
-    target_id: int
+    authorize_screen_name: ScreenName
+    token: Token
 
-    def __init__(self, screen_name: str, ct0: str, auth_token: str, target_screen_name: str, target_id: int) -> None:
-        self.screen_name = screen_name
-        self.ct0 = ct0
-        self.auth_token = auth_token
-        self.target_screen_name = target_screen_name or screen_name
-        self.target_id = target_id
+    def __init__(self, authorize_screen_name: str, ct0: str, auth_token: str) -> None:
+        self.authorize_screen_name = ScreenName(authorize_screen_name)
+        self.token = Token.create(self.authorize_screen_name, ct0, auth_token)
+
+    @property
+    def scraper(self) -> Scraper:
+        if hasattr(self, "_scraper"):
+            return self._scraper
+        self._scraper = Scraper(
+            cookies={"ct0": self.token.ct0, "auth_token": self.token.auth_token}, pbar=False
+        )
+        return self._scraper
+
+    def _get_userid(self, screen_name: ScreenName | str) -> UserId:
+        if isinstance(screen_name, ScreenName):
+            screen_name = screen_name.name
+
+        if hasattr(self, "_user_id_dict"):
+            if user_id := self._user_id_dict.get(screen_name, ""):
+                return UserId(user_id)
+        else:
+            self._user_id_dict = {}
+
+        scraper: Scraper = self.scraper
+        user_dict: dict = scraper.users([screen_name])
+        user_id: int = int(self._find_values(user_dict, "rest_id")[0])
+        self._user_id_dict[screen_name] = user_id
+        return UserId(user_id)
 
     def _find_values(self, obj: Any, key: str) -> list:
         def _inner_helper(inner_obj: Any, inner_key: str, inner_result: list) -> list:
@@ -42,8 +66,8 @@ class TwitterAPI():
         logger.info(f"GET like, target user is '{screen_name}' -> start")
         result = []
 
-        scraper = Scraper(cookies={"ct0": self.ct0, "auth_token": self.auth_token}, pbar=False)
-        likes = scraper.likes([self.target_id], limit=limit)
+        target_id = self._get_userid(screen_name)
+        likes = self.scraper.likes([target_id.id], limit=limit)
 
         # entries のみ対象とする
         entry_list: list[dict] = self._find_values(likes, "entries")[0]
@@ -75,8 +99,8 @@ class TwitterAPI():
         logger.info(f"GET user timeline, target user is '{screen_name}' -> start")
         result = []
 
-        scraper = Scraper(cookies={"ct0": self.ct0, "auth_token": self.auth_token}, pbar=False)
-        timeline_tweets = scraper.tweets_and_replies([self.target_id], limit=limit)
+        target_id = self._get_userid(screen_name)
+        timeline_tweets = self.scraper.tweets_and_replies([target_id.id], limit=limit)
 
         # entries のみ対象とする（entry にピン留めツイートの情報があるため除外）
         entry_list: list[dict] = self._find_values(timeline_tweets, "entries")[0]
@@ -109,32 +133,24 @@ if __name__ == "__main__":
     import logging.config
     logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
 
-    import configparser
-    config = configparser.ConfigParser()
-    CONFIG_FILE_NAME = "./config/config.ini"
-    if not config.read(CONFIG_FILE_NAME, encoding="utf8"):
-        raise IOError
+    CONFIG_FILE_NAME = "./config/config.json"
+    config_dict = orjson.loads(Path(CONFIG_FILE_NAME).read_bytes())
 
-    authorize_screen_name = config["twitter"]["authorize_screen_name"]
-    ct0 = config["twitter_api_client"]["ct0"]
-    auth_token = config["twitter_api_client"]["auth_token"]
-    target_screen_name = config["twitter_api_client"]["target_screen_name"]
-    target_id = config["twitter_api_client"]["target_id"]
-    twitter = TwitterAPI(authorize_screen_name, ct0, auth_token, target_screen_name, target_id)
+    config_dict = config_dict["twitter_api_client_list"][0]
+    authorize_screen_name = config_dict["authorize"]["screen_name"]
+    ct0 = config_dict["authorize"]["ct0"]
+    auth_token = config_dict["authorize"]["auth_token"]
+    target_screen_name = config_dict["target"][0]["screen_name"]
+    twitter = TwitterAPI(authorize_screen_name, ct0, auth_token)
+
     result: dict | list[dict] = []
-
-    def save_response(result_data):
-        RESPONSE_CACHE_PATH = "./response.txt"
-        with Path(RESPONSE_CACHE_PATH).open("w") as fout:
-            json.dump(result_data, fout, indent=4, ensure_ascii=False)
+    RESPONSE_CACHE_PATH = "./response.txt"
 
     pprint.pprint("like 取得")
-    result = twitter.get_likes(twitter.target_screen_name, 30, 1633424214756839425)
-    # save_response(result)
+    result = twitter.get_likes(target_screen_name, 30, 1633424214756839425)
     pprint.pprint(len(result))
-    exit(0)
+    # exit(0)
 
-    # pprint.pprint("TL 取得")
-    # result = twitter.get_user_timeline(twitter.target_screen_name, 30, 1686617172276359168)
-    # save_response(result)
-    # pprint.pprint(len(result))
+    pprint.pprint("TL 取得")
+    result = twitter.get_user_timeline(target_screen_name, 30, 1686617172276359168)
+    pprint.pprint(len(result))
