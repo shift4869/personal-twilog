@@ -28,7 +28,7 @@ class TwitterAPI():
         if hasattr(self, "_scraper"):
             return self._scraper
         self._scraper = Scraper(
-            cookies={"ct0": self.token.ct0, "auth_token": self.token.auth_token}, pbar=False, debug=1
+            cookies={"ct0": self.token.ct0, "auth_token": self.token.auth_token}, pbar=False, debug=0
         )
         return self._scraper
 
