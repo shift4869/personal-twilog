@@ -1,5 +1,4 @@
 # coding: utf-8
-import json
 import pprint
 from logging import INFO, getLogger
 from pathlib import Path
@@ -29,7 +28,7 @@ class TwitterAPI():
         if hasattr(self, "_scraper"):
             return self._scraper
         self._scraper = Scraper(
-            cookies={"ct0": self.token.ct0, "auth_token": self.token.auth_token}, pbar=False
+            cookies={"ct0": self.token.ct0, "auth_token": self.token.auth_token}, pbar=False, debug=1
         )
         return self._scraper
 
@@ -70,7 +69,7 @@ class TwitterAPI():
         likes = self.scraper.likes([target_id.id], limit=limit)
 
         # entries のみ対象とする
-        entry_list: list[dict] = self._find_values(likes, "entries")[0]
+        entry_list: list[dict] = self._find_values(likes, "entries")
         tweet_results: list[dict] = self._find_values(entry_list, "tweet_results")
 
         tweet_list = []
@@ -90,6 +89,7 @@ class TwitterAPI():
                     continue
                 if str(min_id) in tweet_ids:
                     break
+        result.extend(tweet_list)
 
         result = tweet_list[:limit]
         logger.info(f"GET like, target user is '{screen_name}' -> done")
@@ -103,7 +103,7 @@ class TwitterAPI():
         timeline_tweets = self.scraper.tweets_and_replies([target_id.id], limit=limit)
 
         # entries のみ対象とする（entry にピン留めツイートの情報があるため除外）
-        entry_list: list[dict] = self._find_values(timeline_tweets, "entries")[0]
+        entry_list: list[dict] = self._find_values(timeline_tweets, "entries")
         tweet_results: list[dict] = self._find_values(entry_list, "tweet_results")
 
         tweet_list = []
@@ -123,6 +123,7 @@ class TwitterAPI():
                     continue
                 if str(min_id) in tweet_ids:
                     break
+        result.extend(tweet_list)
 
         result = tweet_list[:limit]
         logger.info(f"GET user timeline, target user is '{screen_name}' -> done")
@@ -146,11 +147,12 @@ if __name__ == "__main__":
     result: dict | list[dict] = []
     RESPONSE_CACHE_PATH = "./response.txt"
 
-    pprint.pprint("like 取得")
-    result = twitter.get_likes(target_screen_name, 30, 1633424214756839425)
-    pprint.pprint(len(result))
+    # pprint.pprint("like 取得")
+    # result = twitter.get_likes(target_screen_name, 30, 1633424214756839425)
+    # pprint.pprint(len(result))
     # exit(0)
 
     pprint.pprint("TL 取得")
-    result = twitter.get_user_timeline(target_screen_name, 30, 1686617172276359168)
+    # result = twitter.get_user_timeline(target_screen_name, 30, 1686617172276359168)
+    result = twitter.get_user_timeline(target_screen_name, 50, -1)
     pprint.pprint(len(result))
