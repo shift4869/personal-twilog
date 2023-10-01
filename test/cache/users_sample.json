@@ -1,0 +1,51 @@
+{
+    "data": {
+        "user": {
+            "result": {
+                "__typename": "User",
+                "id": "id",
+                "rest_id": "12345678",
+                "is_blue_verified": false,
+                "profile_image_shape": "Circle",
+                "legacy": {
+                    "followed_by": true,
+                    "following": true,
+                    "can_dm": true,
+                    "can_media_tag": false,
+                    "created_at": "Sat Aug 07 07:44:37 +0000 2010",
+                    "description": "description",
+                    "entities": {
+                        "description": {
+                            "urls": []
+                        },
+                        "url": {
+                            "urls": [
+                                {
+                                    "display_url": "display_url",
+                                    "expanded_url": "expanded_url",
+                                    "url": "https://t.co/xxxxxxxxx",
+                                    "indices": [
+                                        0,
+                                        23
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "favourites_count": 251062,
+                    "followers_count": 254,
+                    "friends_count": 491,
+                    "listed_count": 13,
+                    "location": "location",
+                    "media_count": 6738,
+                    "name": "dummy_user_name",
+                    "normal_followers_count": 254,
+                    "screen_name": "dummy_screen_name",
+                    "statuses_count": 455497,
+                    "verified": false,
+                    "want_retweets": true
+                }
+            }
+        }
+    }
+}

@@ -33,6 +33,19 @@ class TwitterAPI():
         )
         return self._scraper
 
+    def _find_values(self, obj: Any, key: str) -> list:
+        def _inner_helper(inner_obj: Any, inner_key: str, inner_result: list) -> list:
+            if isinstance(inner_obj, dict) and (inner_dict := inner_obj):
+                for k, v in inner_dict.items():
+                    if k == inner_key:
+                        inner_result.append(v)
+                    inner_result.extend(_inner_helper(v, inner_key, []))
+            if isinstance(inner_obj, list) and (inner_list := inner_obj):
+                for element in inner_list:
+                    inner_result.extend(_inner_helper(element, inner_key, []))
+            return inner_result
+        return _inner_helper(obj, key, [])
+
     def _get_user(self, screen_name: ScreenName | str) -> dict:
         if isinstance(screen_name, ScreenName):
             screen_name = screen_name.name
@@ -47,19 +60,6 @@ class TwitterAPI():
         user_dict: dict = scraper.users([screen_name])
         self._user_dict[screen_name] = user_dict
         return user_dict
-
-    def _find_values(self, obj: Any, key: str) -> list:
-        def _inner_helper(inner_obj: Any, inner_key: str, inner_result: list) -> list:
-            if isinstance(inner_obj, dict) and (inner_dict := inner_obj):
-                for k, v in inner_dict.items():
-                    if k == inner_key:
-                        inner_result.append(v)
-                    inner_result.extend(_inner_helper(v, inner_key, []))
-            if isinstance(inner_obj, list) and (inner_list := inner_obj):
-                for element in inner_list:
-                    inner_result.extend(_inner_helper(element, inner_key, []))
-            return inner_result
-        return _inner_helper(obj, key, [])
 
     def get_user_id(self, screen_name: ScreenName | str) -> UserId:
         user_dict: dict = self._get_user(screen_name)
