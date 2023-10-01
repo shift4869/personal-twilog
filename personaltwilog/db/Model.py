@@ -160,6 +160,9 @@ class Likes(Base):
         [tweet_text] TEXT,
         [tweet_via] TEXT,
         [tweet_url] TEXT NOT NULL,
+        [tweet_user_id] TEXT NOT NULL,
+        [tweet_user_name] TEXT NOT NULL,
+        [tweet_screen_name] TEXT NOT NULL,
         [user_id] TEXT NOT NULL,
         [user_name] TEXT NOT NULL,
         [screen_name] TEXT NOT NULL,
@@ -182,6 +185,9 @@ class Likes(Base):
     tweet_text = Column(String(256))
     tweet_via = Column(String(256))
     tweet_url = Column(String(256), nullable=False)
+    tweet_user_id = Column(String(256), nullable=False)
+    tweet_user_name = Column(String(256), nullable=False)
+    tweet_screen_name = Column(String(256), nullable=False)
     user_id = Column(String(256), nullable=False)
     user_name = Column(String(256), nullable=False)
     screen_name = Column(String(256), nullable=False)
@@ -200,6 +206,9 @@ class Likes(Base):
                  tweet_text: str,
                  tweet_via: str,
                  tweet_url: str,
+                 tweet_user_id: str,
+                 tweet_user_name: str,
+                 tweet_screen_name: str,
                  user_id: str,
                  user_name: str,
                  screen_name: str,
@@ -217,6 +226,9 @@ class Likes(Base):
         self.tweet_text = tweet_text
         self.tweet_via = tweet_via
         self.tweet_url = tweet_url
+        self.tweet_user_id = tweet_user_id
+        self.tweet_user_name = tweet_user_name
+        self.tweet_screen_name = tweet_screen_name
         self.user_id = user_id
         self.user_name = user_name
         self.screen_name = screen_name
@@ -238,6 +250,9 @@ class Likes(Base):
                 "tweet_text": tweet_text,
                 "tweet_via": tweet_via,
                 "tweet_url": tweet_url,
+                "tweet_user_id": tweet_user_id,
+                "tweet_user_name": tweet_user_name,
+                "tweet_screen_name": tweet_screen_name,
                 "user_id": user_id,
                 "user_name": user_name,
                 "screen_name": screen_name,
@@ -255,6 +270,9 @@ class Likes(Base):
                              tweet_text,
                              tweet_via,
                              tweet_url,
+                             tweet_user_id,
+                             tweet_user_name,
+                             tweet_screen_name,
                              user_id,
                              user_name,
                              screen_name,
@@ -282,6 +300,9 @@ class Likes(Base):
             "tweet_text": self.tweet_text,
             "tweet_via": self.tweet_via,
             "tweet_url": self.tweet_url,
+            "tweet_user_id": self.tweet_user_id,
+            "tweet_user_name": self.tweet_user_name,
+            "tweet_screen_name": self.tweet_screen_name,
             "user_id": self.user_id,
             "user_name": self.user_name,
             "screen_name": self.screen_name,

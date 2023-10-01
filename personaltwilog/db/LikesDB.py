@@ -18,10 +18,10 @@ class LikesDB(Base):
         session.close()
         return result
 
-    def select_for_max_id(self) -> int:
+    def select_for_max_id(self, screen_name: str) -> int:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
-        r = session.query(Likes).order_by(Likes.id.desc()).first()
+        r = session.query(Likes).filter(Likes.screen_name == screen_name).order_by(Likes.id.desc()).first()
         session.close()
         result = r.tweet_id or 0
         return int(result)
@@ -65,6 +65,9 @@ class LikesDB(Base):
                 p.tweet_text = r.tweet_text
                 p.tweet_via = r.tweet_via
                 p.tweet_url = r.tweet_url
+                p.tweet_user_id = r.tweet_user_id
+                p.tweet_user_name = r.tweet_user_name
+                p.tweet_screen_name = r.tweet_screen_name
                 p.user_id = r.user_id
                 p.user_name = r.user_name
                 p.screen_name = r.screen_name

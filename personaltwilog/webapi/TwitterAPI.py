@@ -10,6 +10,7 @@ from twitter.scraper import Scraper
 from personaltwilog.webapi.valueobject.ScreenName import ScreenName
 from personaltwilog.webapi.valueobject.Token import Token
 from personaltwilog.webapi.valueobject.UserId import UserId
+from personaltwilog.webapi.valueobject.UserName import UserName
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
@@ -32,21 +33,20 @@ class TwitterAPI():
         )
         return self._scraper
 
-    def _get_userid(self, screen_name: ScreenName | str) -> UserId:
+    def _get_user(self, screen_name: ScreenName | str) -> dict:
         if isinstance(screen_name, ScreenName):
             screen_name = screen_name.name
 
-        if hasattr(self, "_user_id_dict"):
-            if user_id := self._user_id_dict.get(screen_name, ""):
-                return UserId(user_id)
+        if hasattr(self, "_user_dict"):
+            if result := self._user_dict.get(screen_name, {}):
+                return result
         else:
-            self._user_id_dict = {}
+            self._user_dict = {}
 
         scraper: Scraper = self.scraper
         user_dict: dict = scraper.users([screen_name])
-        user_id: int = int(self._find_values(user_dict, "rest_id")[0])
-        self._user_id_dict[screen_name] = user_id
-        return UserId(user_id)
+        self._user_dict[screen_name] = user_dict
+        return user_dict
 
     def _find_values(self, obj: Any, key: str) -> list:
         def _inner_helper(inner_obj: Any, inner_key: str, inner_result: list) -> list:
@@ -61,11 +61,21 @@ class TwitterAPI():
             return inner_result
         return _inner_helper(obj, key, [])
 
+    def get_user_id(self, screen_name: ScreenName | str) -> UserId:
+        user_dict: dict = self._get_user(screen_name)
+        user_id: int = int(self._find_values(user_dict, "rest_id")[0])
+        return UserId(user_id)
+
+    def get_user_name(self, screen_name: ScreenName | str) -> UserName:
+        user_dict: dict = self._get_user(screen_name)
+        user_name: str = self._find_values(user_dict, "name")[0]
+        return UserName(user_name)
+
     def get_likes(self, screen_name: str, limit: int = 300, min_id: int = -1) -> list[dict]:
         logger.info(f"GET like, target user is '{screen_name}' -> start")
         result = []
 
-        target_id = self._get_userid(screen_name)
+        target_id = self.get_user_id(screen_name)
         likes = self.scraper.likes([target_id.id], limit=limit)
 
         # entries のみ対象とする
@@ -99,7 +109,7 @@ class TwitterAPI():
         logger.info(f"GET user timeline, target user is '{screen_name}' -> start")
         result = []
 
-        target_id = self._get_userid(screen_name)
+        target_id = self.get_user_id(screen_name)
         timeline_tweets = self.scraper.tweets_and_replies([target_id.id], limit=limit)
 
         # entries のみ対象とする（entry にピン留めツイートの情報があるため除外）

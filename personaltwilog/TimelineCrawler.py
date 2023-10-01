@@ -593,7 +593,7 @@ class TimelineCrawler():
         logger.info("TimelineCrawler likes_crawl -> start")
         logger.info("TimelineCrawler likes_crawl init -> start")
         # 探索する id_str の下限値を設定
-        min_id = self.likes_db.select_for_max_id()
+        min_id = self.likes_db.select_for_max_id(screen_name)
         logger.info(f"Target Likes's screen_name is '{screen_name}'.")
         logger.info(f"Last registered tweet_id is '{min_id}'.")
         logger.info("TimelineCrawler likes_crawl init -> done")
@@ -634,6 +634,19 @@ class TimelineCrawler():
             if (tweet_id := tweet_dict.get("tweet_id", "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
         ]
         tweet_dict_list.reverse()
+        # Likeしたアカウントの情報も付与するために結果の辞書を調整する
+        user_id = self.twitter.get_user_id(screen_name)
+        user_name = self.twitter.get_user_name(screen_name)
+        tweet_dict_list = [
+            tweet_dict | {
+                "tweet_user_id": tweet_dict["user_id"],
+                "tweet_user_name": tweet_dict["user_name"],
+                "tweet_screen_name": tweet_dict["screen_name"],
+                "user_id": user_id.id,
+                "user_name": user_name.name,
+                "screen_name": screen_name,
+            } for tweet_dict in tweet_dict_list
+        ]
         self.likes_db.upsert(tweet_dict_list)
         logger.info("Likes table update -> done")
 
