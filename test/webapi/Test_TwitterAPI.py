@@ -1,7 +1,8 @@
-from pathlib import Path
 import sys
 import unittest
 from contextlib import ExitStack
+from logging import getLogger
+from pathlib import Path
 
 import orjson
 from mock import MagicMock, patch
@@ -11,6 +12,8 @@ from personaltwilog.webapi.valueobject.ScreenName import ScreenName
 from personaltwilog.webapi.valueobject.Token import Token
 from personaltwilog.webapi.valueobject.UserId import UserId
 from personaltwilog.webapi.valueobject.UserName import UserName
+
+logger = getLogger("personaltwilog.webapi.TwitterAPI")
 
 
 class TestTwitterAPI(unittest.TestCase):
@@ -114,11 +117,61 @@ class TestTwitterAPI(unittest.TestCase):
 
     def test_get_likes(self):
         with ExitStack() as stack:
-            # mockcp = stack.enter_context(patch("configparser.ConfigParser"))
-            pass
+            mock_logger = stack.enter_context(patch.object(logger, "info"))
+            mock_get_user_id = stack.enter_context(patch("personaltwilog.webapi.TwitterAPI.TwitterAPI.get_user_id"))
+            mock_scraper = stack.enter_context(patch("personaltwilog.webapi.TwitterAPI.Scraper"))
+
+            json_dict = orjson.loads(Path("./test/cache/likes_sample.json").read_bytes())
+            mock_likes = MagicMock()
+            mock_likes.likes = lambda target_id, limit: json_dict
+            mock_scraper.side_effect = lambda cookies, pbar, debug: mock_likes
+
+            target_id = UserId(12345678)
+            mock_get_user_id.side_effect = lambda screen_name: target_id
+
+            twitter = self.get_instance()
+
+            screen_name = "dummy_screen_name"
+            actual = twitter.get_likes(screen_name)
+
+            entry_list: list[dict] = twitter._find_values(json_dict, "entries")
+            expect: list[dict] = twitter._find_values(entry_list, "tweet_results")
+            self.assertEqual(expect, actual)
+
+            actual = twitter.get_likes(screen_name, 5)
+            self.assertEqual(expect[:5], actual)
+
+            actual = twitter.get_likes(screen_name, 300, 33333333)
+            self.assertEqual(expect[:3], actual)
 
     def test_get_user_timeline(self):
-        pass
+        with ExitStack() as stack:
+            mock_logger = stack.enter_context(patch.object(logger, "info"))
+            mock_get_user_id = stack.enter_context(patch("personaltwilog.webapi.TwitterAPI.TwitterAPI.get_user_id"))
+            mock_scraper = stack.enter_context(patch("personaltwilog.webapi.TwitterAPI.Scraper"))
+
+            json_dict = orjson.loads(Path("./test/cache/likes_sample.json").read_bytes())
+            mock_timeline = MagicMock()
+            mock_timeline.tweets_and_replies = lambda target_id, limit: json_dict
+            mock_scraper.side_effect = lambda cookies, pbar, debug: mock_timeline
+
+            target_id = UserId(12345678)
+            mock_get_user_id.side_effect = lambda screen_name: target_id
+
+            twitter = self.get_instance()
+
+            screen_name = "dummy_screen_name"
+            actual = twitter.get_user_timeline(screen_name)
+
+            entry_list: list[dict] = twitter._find_values(json_dict, "entries")
+            expect: list[dict] = twitter._find_values(entry_list, "tweet_results")
+            self.assertEqual(expect, actual)
+
+            actual = twitter.get_user_timeline(screen_name, 5)
+            self.assertEqual(expect[:5], actual)
+
+            actual = twitter.get_user_timeline(screen_name, 300, 33333333)
+            self.assertEqual(expect[:3], actual)
 
 
 if __name__ == "__main__":
