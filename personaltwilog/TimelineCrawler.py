@@ -155,7 +155,7 @@ class TimelineCrawler():
         user_name = self.twitter.get_user_name(screen_name)
         tweet_dict_list = LikesParser(
             tweet_list, self.registered_at, user_id.id_str, user_name.name, screen_name
-        )
+        ).parse()
         self.likes_db.upsert(tweet_dict_list)
         logger.info("Likes table update -> done")
 
