@@ -1,16 +1,11 @@
-import logging.config
 import re
 from datetime import datetime
-from logging import INFO, getLogger
 from pathlib import Path
 
 import orjson
 
 from personaltwilog.parser.ParserBase import ParserBase
 from personaltwilog.Util import find_values
-
-logger = getLogger(__name__)
-logger.setLevel(INFO)
 
 
 class ExternalLinkParser(ParserBase):
@@ -23,24 +18,28 @@ class ExternalLinkParser(ParserBase):
         for tweet in flattened_tweet_list:
             if not tweet:
                 continue
-            tweet_legacy: dict = tweet.get("legacy")
-            tweet_user: dict = tweet.get("core", {}).get("user_results", {}).get("result")
-            tweet_user_legacy: dict = tweet_user.get("legacy")
 
-            tweet_id: str = tweet.get("rest_id")
-            tweet_text: str = tweet_legacy.get("full_text")
-            via_html: str = tweet.get("source")
+            tweet_legacy: dict = tweet["legacy"]
+
+            # tweet が外部リンクを持つかどうか
+            entities: dict = tweet_legacy.get("entities", {})
+            expanded_urls = self._match_entities(entities).get("expanded_urls", [])
+            if not expanded_urls:
+                continue
+
+            tweet_user: dict = tweet["core"]["user_results"]["result"]
+            tweet_user_legacy: dict = tweet_user["legacy"]
+
+            tweet_id: str = tweet["rest_id"]
+            tweet_text: str = tweet_legacy["full_text"]
+            via_html: str = tweet["source"]
             tweet_via = re.findall("^<.+?>([^<]*?)<.+?>$", via_html)[0]
-            screen_name: str = tweet_user_legacy.get("screen_name")
+            screen_name: str = tweet_user_legacy["screen_name"]
             tweet_url: str = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
             created_at = self._get_created_at(tweet)
-            appeared_at = tweet.get("appeared_at", None)
+            appeared_at = tweet["appeared_at"]
 
-            # tweet が外部リンクを持つかどうか
-            # TODO:: linksearch に任せる？
-            entities: dict = tweet_legacy.get("entities", {})
-            expanded_urls = self._match_entities(entities).get("expanded_urls", [])
             for expanded_url in expanded_urls:
                 external_link_url = expanded_url
                 external_link_type = self._get_external_link_type(external_link_url)
@@ -63,14 +62,6 @@ class ExternalLinkParser(ParserBase):
 
 
 if __name__ == "__main__":
-    logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
-    for name in logging.root.manager.loggerDict:
-        if "personaltwilog" in name:
-            continue
-        if "__main__" in name:
-            continue
-        getLogger(name).disabled = True
-
     data_cache_path = Path("./data/175674367/")
     cache_path = list(data_cache_path.glob("*UserTweetsAndReplies*"))[-1]
     tweet_dict = orjson.loads(cache_path.read_bytes())

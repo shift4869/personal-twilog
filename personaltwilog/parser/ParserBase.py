@@ -1,16 +1,13 @@
-import logging.config
 import re
 import sys
 import urllib.parse
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from logging import INFO, getLogger
 from pathlib import Path
 
 import requests
 
-logger = getLogger(__name__)
-logger.setLevel(INFO)
+from personaltwilog.Util import find_values
 
 
 class ParserBase:
@@ -18,6 +15,13 @@ class ParserBase:
     registered_at: str
 
     def __init__(self, tweet_dict_list: list[dict], registered_at: str) -> None:
+        if not isinstance(tweet_dict_list, list):
+            raise TypeError("Argument tweet_dict_list is not list.")
+        if not all([isinstance(d, dict) for d in tweet_dict_list]):
+            raise TypeError("Argument tweet_dict_list is not list[dict].")
+        if not isinstance(registered_at, str):
+            raise TypeError("Argument registered_at is not str.")
+
         self.tweet_dict_list = tweet_dict_list
         self.registered_at = registered_at
 
@@ -25,7 +29,28 @@ class ParserBase:
     def result(self) -> list[dict]:
         return self.tweet_dict_list
 
+    def _remove_duplicates(self, dict_list: list[dict]) -> list[dict]:
+        if not isinstance(dict_list, list):
+            raise TypeError("Argument dict_list is not list.")
+        if not all([isinstance(d, dict) for d in dict_list]):
+            raise TypeError("Argument dict_list is not list[dict].")
+
+        dup_target_key = "tweet_id"
+        key_check = [d.get(dup_target_key, "") != "" for d in dict_list]
+        if not all(key_check):
+            raise ValueError(f"Argument dict_list include element that not has '{dup_target_key}' key.")
+
+        seen = []
+        dict_list = [
+            d for d in dict_list
+            if (tweet_id := d.get(dup_target_key, "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
+        ]
+        return dict_list
+
     def _get_external_link_type(self, external_link_url: str) -> str:
+        if not isinstance(external_link_url, str):
+            raise TypeError("Argument external_link_url is not str.")
+
         url = external_link_url
         pattern = r"^https://www.pixiv.net/artworks/[0-9]+"
         if re.search(pattern, url):
@@ -34,9 +59,6 @@ class ParserBase:
         if re.search(pattern, url):
             return "pixiv_novel"
         pattern = r"^https?://nijie.info/view.php\?id=[0-9]+"
-        if re.search(pattern, url):
-            return "nijie"
-        pattern = r"^https?://nijie.info/view_popup.php\?id=[0-9]+"
         if re.search(pattern, url):
             return "nijie"
         pattern = r"^https?://nijie.info/view_popup.php\?id=[0-9]+"
@@ -62,16 +84,20 @@ class ParserBase:
         Returns:
             expanded_urls (dict): entities に含まれる expanded_url のみを抽出した辞書, 解析失敗時は空辞書
         """
-        match entities:
-            case {"urls": urls_dict}:
-                expanded_urls = []
-                for url_dict in urls_dict:
-                    expanded_url = url_dict.get("expanded_url", "")
-                    if not expanded_url:
-                        continue
-                    expanded_urls.append(expanded_url)
-                return {"expanded_urls": expanded_urls}
-        return {}
+        if not isinstance(entities, dict):
+            raise TypeError("Argument entities is not dict.")
+        # match entities:
+        #     case {"urls": urls_dict}:
+        #         expanded_urls = []
+        #         for url_dict in urls_dict:
+        #             expanded_url = url_dict.get("expanded_url", "")
+        #             if not expanded_url:
+        #                 continue
+        #             expanded_urls.append(expanded_url)
+        #         return {"expanded_urls": expanded_urls}
+        # return {}
+        expanded_urls = find_values(entities, "expanded_url")
+        return {"expanded_urls": expanded_urls} if expanded_urls else {}
 
     def _match_media(self, media: dict) -> dict:
         """mediaから保存対象のメディアURLを取得する
@@ -82,6 +108,8 @@ class ParserBase:
         Returns:
             result (dict): 成功時 result, そうでなければ空辞書
         """
+        if not isinstance(media, dict):
+            raise TypeError("Argument media is not dict.")
         match media:
             case {
                 "type": "photo",
@@ -125,10 +153,15 @@ class ParserBase:
         return {}
 
     def _get_media_size(self, media_url: str) -> int:
-        # HEADリクエストを送信してレスポンスヘッダーを取得
-        response = requests.head(media_url)
-        # Content-Lengthフィールドからファイルサイズを取得
-        file_size = int(response.headers.get("Content-Length", 0))
+        file_size = -1
+        try:
+            # HEADリクエストを送信してレスポンスヘッダーを取得
+            response = requests.head(media_url)
+            response.raise_for_status()
+            # Content-Lengthフィールドからファイルサイズを取得
+            file_size = int(response.headers.get("Content-Length", 0))
+        except Exception as e:
+            file_size = -1
         return file_size
 
     def _match_rt_quote(self, tweet: dict) -> tuple[dict, dict]:
@@ -294,25 +327,10 @@ class ParserBase:
             edited_tweet_list.append(tweet)
         return edited_tweet_list
 
-    def _remove_duplicates(self, dict_list: list[dict]) -> list[dict]:
-        seen = []
-        dict_list = [
-            d for d in dict_list
-            if (tweet_id := d.get("tweet_id", "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
-        ]
-        return dict_list
-
     @abstractmethod
     def parse(self):
         pass
 
 
 if __name__ == "__main__":
-    logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
-    for name in logging.root.manager.loggerDict:
-        if "personaltwilog" in name:
-            continue
-        if "__main__" in name:
-            continue
-        getLogger(name).disabled = True
     pass

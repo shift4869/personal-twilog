@@ -17,7 +17,6 @@ logger = getLogger("personaltwilog.webapi.TwitterAPI")
 
 
 class TestTwitterAPI(unittest.TestCase):
-
     def get_instance(self) -> TwitterAPI:
         authorize_screen_name = "authorize_screen_name"
         ct0 = "ct0"
@@ -150,7 +149,7 @@ class TestTwitterAPI(unittest.TestCase):
             mock_get_user_id = stack.enter_context(patch("personaltwilog.webapi.TwitterAPI.TwitterAPI.get_user_id"))
             mock_scraper = stack.enter_context(patch("personaltwilog.webapi.TwitterAPI.Scraper"))
 
-            json_dict = orjson.loads(Path("./test/cache/likes_sample.json").read_bytes())
+            json_dict = orjson.loads(Path("./test/cache/timeline_sample.json").read_bytes())
             mock_timeline = MagicMock()
             mock_timeline.tweets_and_replies = lambda target_id, limit: json_dict
             mock_scraper.side_effect = lambda cookies, pbar, debug: mock_timeline
@@ -170,7 +169,7 @@ class TestTwitterAPI(unittest.TestCase):
             actual = twitter.get_user_timeline(screen_name, 5)
             self.assertEqual(expect[:5], actual)
 
-            actual = twitter.get_user_timeline(screen_name, 300, 33333333)
+            actual = twitter.get_user_timeline(screen_name, 300, 30003)
             self.assertEqual(expect[:3], actual)
 
 

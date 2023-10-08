@@ -1,16 +1,11 @@
-import logging.config
 from copy import deepcopy
 from datetime import datetime
-from logging import INFO, getLogger
 from pathlib import Path
 
 import orjson
 
 from personaltwilog.parser.ParserBase import ParserBase
 from personaltwilog.Util import find_values
-
-logger = getLogger(__name__)
-logger.setLevel(INFO)
 
 
 class MetricParser(ParserBase):
@@ -47,14 +42,6 @@ class MetricParser(ParserBase):
 
 
 if __name__ == "__main__":
-    logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
-    for name in logging.root.manager.loggerDict:
-        if "personaltwilog" in name:
-            continue
-        if "__main__" in name:
-            continue
-        getLogger(name).disabled = True
-
     data_cache_path = Path("./data/175674367/")
     cache_path = list(data_cache_path.glob("*UserTweetsAndReplies*"))[-1]
     tweet_dict = orjson.loads(cache_path.read_bytes())
