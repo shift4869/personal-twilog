@@ -3,7 +3,6 @@ import unittest
 import urllib.parse
 from contextlib import ExitStack
 from datetime import datetime, timedelta
-from logging import getLogger
 from pathlib import Path
 
 import orjson
