@@ -8,19 +8,25 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 freezegun = "^1.2.2"
-httpx = "^0.25.0"
+httpx = "^0.25.1"
 isort = "^5.12.0"
 mock = "^5.0.1"
 orjson = "^3.9.7"
-pycodestyle = "^2.11.0"
-python = "^3.11,<4.0"
+pycodestyle = "^2.11.1"
+python = ">=3.11,<4.0"
 requests = "^2.31.0"
-sqlalchemy = "^2.0.21"
-twitter-api-client = "^0.10.11"
+sqlalchemy = "^2.0.23"
+twitter-api-client = "^0.10.12"
 
 [tool.isort]
 line_length = 256
 multi_line_output = 9
+
+[tool.ruff]
+organizeImports = false
+
+[tool.ruff.lint]
+ignore = ["F401", "F541", "F841"]
 
 [build-system]
 requires = ["poetry-core"]
