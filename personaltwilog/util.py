@@ -4,9 +4,9 @@ from typing import Any
 def find_values(
     obj: Any,
     key: str,
+    is_predict_one: bool = False,
     key_white_list: list[str] = None,
     key_black_list: list[str] = None,
-    is_predict_one: bool = False,
 ) -> list:
     if not key_white_list:
         key_white_list = []

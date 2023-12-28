@@ -87,16 +87,6 @@ class ParserBase:
         """
         if not isinstance(entities, dict):
             raise TypeError("Argument entities is not dict.")
-        # match entities:
-        #     case {"urls": urls_dict}:
-        #         expanded_urls = []
-        #         for url_dict in urls_dict:
-        #             expanded_url = url_dict.get("expanded_url", "")
-        #             if not expanded_url:
-        #                 continue
-        #             expanded_urls.append(expanded_url)
-        #         return {"expanded_urls": expanded_urls}
-        # return {}
         expanded_urls = find_values(entities, "expanded_url")
         return {"expanded_urls": expanded_urls} if expanded_urls else {}
 

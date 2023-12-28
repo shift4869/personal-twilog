@@ -293,7 +293,7 @@ class TestParserBase(unittest.TestCase):
             created_at = created_at_jst.isoformat()
             return created_at
 
-        created_at_list = [to_jst(d) for d in find_values(tweet_list, "created_at", ["legacy"])]
+        created_at_list = [to_jst(d) for d in find_values(tweet_list, "created_at", False, ["legacy"])]
         for tweet, expect in zip(tweet_list, created_at_list):
             actual = parser._get_created_at(tweet)
             self.assertEqual(expect, actual)

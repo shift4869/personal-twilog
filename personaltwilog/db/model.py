@@ -633,9 +633,6 @@ class Metric(Base):
 
 
 if __name__ == "__main__":
-    from sqlalchemy import create_engine
-    from sqlalchemy.orm import Session
-
     test_db = Path("./test_DB.db")
     test_db.unlink(missing_ok=True)
     engine = create_engine(f"sqlite:///{test_db.name}", echo=True)
