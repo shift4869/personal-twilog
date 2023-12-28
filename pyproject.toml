@@ -7,26 +7,42 @@ license = "MIT LICENSE"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-freezegun = "^1.2.2"
-httpx = "^0.25.1"
-isort = "^5.12.0"
+freezegun = "^1.4.0"
+httpx = "^0.25.2"
+isort = "^5.13.2"
 mock = "^5.0.1"
 orjson = "^3.9.7"
 pycodestyle = "^2.11.1"
 python = ">=3.11,<4.0"
 requests = "^2.31.0"
+ruff = "^0.1.9"
 sqlalchemy = "^2.0.23"
-twitter-api-client = "^0.10.12"
+twitter-api-client = "^0.10.16"
+
+[tool.poetry.dev-dependencies]
 
 [tool.isort]
-line_length = 256
+line_length = 119
 multi_line_output = 9
 
 [tool.ruff]
-organizeImports = false
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".git",
+]
+line-length = 119
 
 [tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "F"]
 ignore = ["F401", "F541", "F841"]
+preview = true
+
+[tool.ruff.format]
+preview = true
+quote-style = "double"
 
 [build-system]
 requires = ["poetry-core"]
