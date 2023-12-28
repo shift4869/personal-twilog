@@ -5,23 +5,20 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.LikesParser import LikesParser
-from personaltwilog.Util import find_values
+from personaltwilog.parser.tweet_parser import TweetParser
+from personaltwilog.util import find_values
 
 
-class TestLikesParser(unittest.TestCase):
+class TestTweetParser(unittest.TestCase):
     def get_json_dict(self) -> dict:
-        return orjson.loads(Path("./test/cache/timeline_sample.json").read_bytes())
+        return orjson.loads(Path("./tests/cache/timeline_sample.json").read_bytes())
 
-    def get_instance(self) -> LikesParser:
+    def get_instance(self) -> TweetParser:
         timeline_dict = self.get_json_dict()
         entry_list: list[dict] = find_values(timeline_dict, "entries")
         tweet_dict_list: list[dict] = find_values(entry_list, "tweet_results")
         registered_at = "2023-10-07T01:00:00"
-        user_id: str = "11111"
-        user_name: str = "user_name_1"
-        screen_name: str = "screen_name_1"
-        parser = LikesParser(tweet_dict_list, registered_at, user_id, user_name, screen_name)
+        parser = TweetParser(tweet_dict_list, registered_at)
         return parser
 
     def test_init(self):
@@ -33,9 +30,6 @@ class TestLikesParser(unittest.TestCase):
         self.assertEqual(expect, actual.tweet_dict_list)
         self.assertEqual(expect, actual.result)
         self.assertEqual("2023-10-07T01:00:00", actual.registered_at)
-        self.assertEqual("11111", actual.user_id)
-        self.assertEqual("user_name_1", actual.user_name)
-        self.assertEqual("screen_name_1", actual.screen_name)
 
     def test_parse(self):
         parser = self.get_instance()
@@ -89,12 +83,9 @@ class TestLikesParser(unittest.TestCase):
                     "tweet_text": tweet_text,
                     "tweet_via": tweet_via,
                     "tweet_url": tweet_url,
-                    "tweet_user_id": user_id,
-                    "tweet_user_name": user_name,
-                    "tweet_screen_name": screen_name,
-                    "user_id": parser.user_id,
-                    "user_name": parser.user_name,
-                    "screen_name": parser.screen_name,
+                    "user_id": user_id,
+                    "user_name": user_name,
+                    "screen_name": screen_name,
                     "is_retweet": is_retweet,
                     "retweet_tweet_id": retweet_tweet_id,
                     "is_quote": is_quote,

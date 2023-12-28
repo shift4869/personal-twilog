@@ -1,13 +1,12 @@
-# coding: utf-8
 import re
 from dataclasses import dataclass
 from typing import Self
 
-from personaltwilog.webapi.valueobject.ScreenName import ScreenName
+from personaltwilog.webapi.valueobject.screen_name import ScreenName
 
 
 @dataclass(frozen=True)
-class Token():
+class Token:
     """twitter-api-client の認証に使うトークン情報
 
     Attributes:
@@ -15,6 +14,7 @@ class Token():
         ct0 (str): トークン情報ct0
         auth_token (str):  トークン情報auth_token
     """
+
     screen_name: ScreenName
     ct0: str
     auth_token: str

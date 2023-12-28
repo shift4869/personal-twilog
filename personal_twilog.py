@@ -1,8 +1,7 @@
-# coding: utf-8
 import logging.config
 from logging import INFO, getLogger
 
-from personaltwilog.TimelineCrawler import TimelineCrawler
+from personaltwilog.timeline_crawler import TimelineCrawler
 
 logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
 for name in logging.root.manager.loggerDict:

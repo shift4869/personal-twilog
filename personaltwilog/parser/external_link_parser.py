@@ -4,8 +4,8 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.ParserBase import ParserBase
-from personaltwilog.Util import find_values
+from personaltwilog.parser.parser_base import ParserBase
+from personaltwilog.util import find_values
 
 
 class ExternalLinkParser(ParserBase):

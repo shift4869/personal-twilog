@@ -1,19 +1,19 @@
-from contextlib import ExitStack
 import re
 import sys
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
-from mock import patch
 
 import orjson
+from mock import patch
 
-from personaltwilog.parser.MediaParser import MediaParser
-from personaltwilog.Util import find_values
+from personaltwilog.parser.media_parser import MediaParser
+from personaltwilog.util import find_values
 
 
 class TestMediaParser(unittest.TestCase):
     def get_json_dict(self) -> dict:
-        return orjson.loads(Path("./test/cache/timeline_sample.json").read_bytes())
+        return orjson.loads(Path("./tests/cache/timeline_sample.json").read_bytes())
 
     def get_instance(self) -> MediaParser:
         timeline_dict = self.get_json_dict()
@@ -97,7 +97,9 @@ class TestMediaParser(unittest.TestCase):
             return media_dict_list
 
         with ExitStack() as stack:
-            mock_get_media_size = stack.enter_context(patch("personaltwilog.parser.MediaParser.MediaParser._get_media_size"))
+            mock_get_media_size = stack.enter_context(
+                patch("personaltwilog.parser.media_parser.MediaParser._get_media_size")
+            )
             mock_get_media_size.side_effect = lambda media_url: -1
 
             actual = parser.parse()

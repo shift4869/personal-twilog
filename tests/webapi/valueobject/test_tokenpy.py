@@ -1,8 +1,8 @@
 import sys
 import unittest
 
-from personaltwilog.webapi.valueobject.ScreenName import ScreenName
-from personaltwilog.webapi.valueobject.Token import Token
+from personaltwilog.webapi.valueobject.screen_name import ScreenName
+from personaltwilog.webapi.valueobject.token import Token
 
 
 class TestToken(unittest.TestCase):

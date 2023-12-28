@@ -4,17 +4,14 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.ParserBase import ParserBase
-from personaltwilog.Util import find_values
+from personaltwilog.parser.parser_base import ParserBase
+from personaltwilog.util import find_values
 
 
 class LikesParser(ParserBase):
-    def __init__(self,
-                 tweet_dict_list: list[dict],
-                 registered_at: str,
-                 user_id: str,
-                 user_name: str,
-                 screen_name: str) -> None:
+    def __init__(
+        self, tweet_dict_list: list[dict], registered_at: str, user_id: str, user_name: str, screen_name: str
+    ) -> None:
         super().__init__(tweet_dict_list, registered_at)
         self.user_id = str(user_id)
         self.user_name = user_name

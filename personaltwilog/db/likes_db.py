@@ -1,10 +1,8 @@
-# coding: utf-8
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql import func
 
-from personaltwilog.db.Base import Base
-from personaltwilog.db.Model import Likes
+from personaltwilog.db.base import Base
+from personaltwilog.db.model import Likes
 
 
 class LikesDB(Base):

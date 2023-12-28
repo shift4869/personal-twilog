@@ -1,19 +1,17 @@
 import sys
 import unittest
-from contextlib import ExitStack
 from copy import deepcopy
 from pathlib import Path
 
 import orjson
-from mock import patch
 
-from personaltwilog.parser.MetricParser import MetricParser
-from personaltwilog.Util import find_values
+from personaltwilog.parser.metric_parser import MetricParser
+from personaltwilog.util import find_values
 
 
 class TestMetricParser(unittest.TestCase):
     def get_json_dict(self) -> dict:
-        return orjson.loads(Path("./test/cache/timeline_sample.json").read_bytes())
+        return orjson.loads(Path("./tests/cache/timeline_sample.json").read_bytes())
 
     def get_instance(self) -> MetricParser:
         timeline_dict = self.get_json_dict()
@@ -48,9 +46,7 @@ class TestMetricParser(unittest.TestCase):
             flattened_tweet_list_r = deepcopy(flattened_tweet_list)
             flattened_tweet_list_r.reverse()
             for tweet in flattened_tweet_list_r:
-                user_dict: dict = tweet.get("core", {}) \
-                                       .get("user_results", {}) \
-                                       .get("result", {})
+                user_dict: dict = tweet.get("core", {}).get("user_results", {}).get("result", {})
                 if not user_dict:
                     continue
                 user_legacy: dict = user_dict.get("legacy", {})

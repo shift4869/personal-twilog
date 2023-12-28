@@ -1,14 +1,9 @@
-# coding: utf-8
-import re
-from typing import Self
-
-from sqlalchemy import asc, or_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
 
-from personaltwilog.db.Base import Base
-from personaltwilog.db.Model import Tweet
+from personaltwilog.db.base import Base
+from personaltwilog.db.model import Tweet
 
 
 class TweetDB(Base):
@@ -25,9 +20,7 @@ class TweetDB(Base):
     def select_for_max_id(self, screen_name) -> int:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
-        r = session.query(
-            func.max(Tweet.tweet_id).filter(Tweet.screen_name == screen_name).label("max_id_str")
-        ).one()
+        r = session.query(func.max(Tweet.tweet_id).filter(Tweet.screen_name == screen_name).label("max_id_str")).one()
         session.close()
         result = r.max_id_str or 0
         return int(result)

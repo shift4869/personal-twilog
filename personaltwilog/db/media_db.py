@@ -1,14 +1,9 @@
-# coding: utf-8
-import re
-from typing import Self
-
-from sqlalchemy import and_, asc, or_
+from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql import func
 
-from personaltwilog.db.Base import Base
-from personaltwilog.db.Model import Media
+from personaltwilog.db.base import Base
+from personaltwilog.db.model import Media
 
 
 class MediaDB(Base):
@@ -48,9 +43,11 @@ class MediaDB(Base):
 
         for r in record_list:
             try:
-                q = session.query(Media).filter(
-                    and_(Media.tweet_id == r.tweet_id, Media.registered_at == r.registered_at)
-                ).with_for_update()
+                q = (
+                    session.query(Media)
+                    .filter(and_(Media.tweet_id == r.tweet_id, Media.registered_at == r.registered_at))
+                    .with_for_update()
+                )
                 p = q.one()
             except NoResultFound:
                 # INSERT

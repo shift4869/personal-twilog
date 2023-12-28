@@ -4,8 +4,8 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.ParserBase import ParserBase
-from personaltwilog.Util import find_values
+from personaltwilog.parser.parser_base import ParserBase
+from personaltwilog.util import find_values
 
 
 class TweetParser(ParserBase):
@@ -13,8 +13,7 @@ class TweetParser(ParserBase):
         super().__init__(tweet_dict_list, registered_at)
 
     def parse(self) -> list[dict]:
-        """tweet_list を解釈してDBに投入する
-        """
+        """tweet_list を解釈してDBに投入する"""
         flattened_tweet_list = self._flatten(self.tweet_dict_list)
         tweet_dict_list = []
         for tweet in flattened_tweet_list:

@@ -5,13 +5,13 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.ExternalLinkParser import ExternalLinkParser
-from personaltwilog.Util import find_values
+from personaltwilog.parser.external_link_parser import ExternalLinkParser
+from personaltwilog.util import find_values
 
 
 class TestExternalLinkParser(unittest.TestCase):
     def get_json_dict(self) -> dict:
-        return orjson.loads(Path("./test/cache/timeline_sample.json").read_bytes())
+        return orjson.loads(Path("./tests/cache/timeline_sample.json").read_bytes())
 
     def get_instance(self) -> ExternalLinkParser:
         timeline_dict = self.get_json_dict()

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.ParserBase import ParserBase
-from personaltwilog.Util import find_values
+from personaltwilog.parser.parser_base import ParserBase
+from personaltwilog.util import find_values
 
 
 class MetricParser(ParserBase):
@@ -20,9 +20,7 @@ class MetricParser(ParserBase):
         flattened_tweet_list_r = deepcopy(flattened_tweet_list)
         flattened_tweet_list_r.reverse()
         for tweet in flattened_tweet_list_r:
-            user_dict: dict = tweet.get("core", {}) \
-                                   .get("user_results", {}) \
-                                   .get("result", {})
+            user_dict: dict = tweet.get("core", {}).get("user_results", {}).get("result", {})
             if not user_dict:
                 continue
             user_legacy: dict = user_dict.get("legacy", {})
@@ -55,10 +53,6 @@ if __name__ == "__main__":
         if data_dict:
             tweet_list.append(data_dict)
 
-    parser = MetricParser(
-        tweet_list,
-        datetime.now().replace(microsecond=0).isoformat(),
-        "_shift4869"
-    )
+    parser = MetricParser(tweet_list, datetime.now().replace(microsecond=0).isoformat(), "_shift4869")
     dict_list = parser.parse()
     print(len(dict_list))

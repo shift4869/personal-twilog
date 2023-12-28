@@ -1,14 +1,14 @@
-# coding: utf-8
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class UserName():
+class UserName:
     """ユーザネーム
 
     Args:
         _name (str): ユーザネーム
     """
+
     _name: str
 
     def __post_init__(self) -> None:

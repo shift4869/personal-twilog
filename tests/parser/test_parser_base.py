@@ -8,8 +8,8 @@ from pathlib import Path
 import orjson
 from mock import MagicMock, patch
 
-from personaltwilog.parser.ParserBase import ParserBase
-from personaltwilog.Util import find_values
+from personaltwilog.parser.parser_base import ParserBase
+from personaltwilog.util import find_values
 
 
 class ConcreteParser(ParserBase):
@@ -19,7 +19,7 @@ class ConcreteParser(ParserBase):
 
 class TestParserBase(unittest.TestCase):
     def get_json_dict(self) -> dict:
-        return orjson.loads(Path("./test/cache/timeline_sample.json").read_bytes())
+        return orjson.loads(Path("./tests/cache/timeline_sample.json").read_bytes())
 
     def get_instance(self) -> ConcreteParser:
         timeline_dict = self.get_json_dict()
@@ -67,7 +67,7 @@ class TestParserBase(unittest.TestCase):
 
         sample_list3 = []
         sample_list3.extend(sample_list)
-        sample_list3.extend(sample_list[:MAX_NUM // 2])
+        sample_list3.extend(sample_list[: MAX_NUM // 2])
         actual = parser._remove_duplicates(sample_list3)
         expect = sample_list
         self.assertEqual(expect, actual)
@@ -195,12 +195,13 @@ class TestParserBase(unittest.TestCase):
 
     def test_get_media_size(self):
         with ExitStack() as stack:
-            mock_requests = stack.enter_context(patch("personaltwilog.parser.ParserBase.requests"))
-            
+            mock_requests = stack.enter_context(patch("personaltwilog.parser.parser_base.requests"))
+
             def return_head(media_url):
                 mock_head_response = MagicMock()
                 mock_head_response.headers = {"Content-Length": len(media_url)}
                 return mock_head_response
+
             mock_requests.head.side_effect = return_head
 
             parser = self.get_instance()
@@ -214,6 +215,7 @@ class TestParserBase(unittest.TestCase):
                 mock_head_response = MagicMock()
                 mock_head_response.headers = {}
                 return mock_head_response
+
             mock_requests.head.side_effect = return_head
             actual = parser._get_media_size(url)
             self.assertEqual(0, actual)
@@ -222,6 +224,7 @@ class TestParserBase(unittest.TestCase):
                 mock_head_response = MagicMock()
                 mock_head_response.raise_for_status.side_effect = ValueError
                 return mock_head_response
+
             mock_requests.head.side_effect = return_head
             actual = parser._get_media_size(url)
             self.assertEqual(-1, actual)
@@ -264,9 +267,7 @@ class TestParserBase(unittest.TestCase):
                         },
                     },
                 }:
-                    retweet_tweet_result = tweet.get("legacy", {}) \
-                                                .get("retweeted_status_result", {}) \
-                                                .get("result", {})
+                    retweet_tweet_result = tweet.get("legacy", {}).get("retweeted_status_result", {}).get("result", {})
                     retweet_tweet = retweet_tweet_result
                     quote_tweet = quote_tweet_result
             return (retweet_tweet, quote_tweet)
@@ -360,105 +361,71 @@ class TestParserBase(unittest.TestCase):
 def make_sample_file():
     def make_entities(i: int, is_external_link: bool):
         if not is_external_link:
-            return {
-                "entities": {
-                    "user_mentions": [],
-                    "urls": [],
-                    "hashtags": [],
-                    "symbols": []
-                }
-            }
+            return {"entities": {"user_mentions": [], "urls": [], "hashtags": [], "symbols": []}}
         external_link = f"https://www.pixiv.net/artworks/{i:08}"
         return {
             "entities": {
-                "description": {
-                    "urls": []
-                },
+                "description": {"urls": []},
                 "url": {
                     "urls": [
-                        {
-                            "display_url": "display_url",
-                            "expanded_url": external_link,
-                            "url": "url",
-                            "indices": [
-                                0,
-                                23
-                            ]
-                        }
+                        {"display_url": "display_url", "expanded_url": external_link, "url": "url", "indices": [0, 23]}
                     ]
-                }
+                },
             }
         }
 
     def make_media(i: int, screen_name: str, photo_num: int, video_num: int):
-        d = {
-            "media": []
-        }
+        d = {"media": []}
         for j in range(photo_num):
-            d["media"].append(
-                {
-                    "display_url": f"pic.twitter.com/{j:08}",
-                    "expanded_url": f"https://twitter.com/{screen_name}/status/{i}{j:07}/photo/1",
-                    "id_str": f"{i:08}",
-                    "indices": [
-                        0,
-                        10
-                    ],
-                    "media_key": f"{i:08}",
-                    "media_url_https": f"https://pbs.twimg.com/media/{i}{j:07}.jpg",
-                    "source_status_id_str": f"{i:08}",
-                    "source_user_id_str": f"{i:08}",
-                    "type": "photo",
-                    "url": f"https://t.co/{j:08}",
-                    "ext_media_availability": {
-                        "status": "Available"
-                    },
-                }
-            )
+            d["media"].append({
+                "display_url": f"pic.twitter.com/{j:08}",
+                "expanded_url": f"https://twitter.com/{screen_name}/status/{i}{j:07}/photo/1",
+                "id_str": f"{i:08}",
+                "indices": [0, 10],
+                "media_key": f"{i:08}",
+                "media_url_https": f"https://pbs.twimg.com/media/{i}{j:07}.jpg",
+                "source_status_id_str": f"{i:08}",
+                "source_user_id_str": f"{i:08}",
+                "type": "photo",
+                "url": f"https://t.co/{j:08}",
+                "ext_media_availability": {"status": "Available"},
+            })
         for j in range(video_num):
-            d["media"].append(
-                {
-                    "display_url": f"pic.twitter.com/{j:08}",
-                    "expanded_url": f"https://twitter.com/{screen_name}/status/{i}{j:07}/video/1",
-                    "id_str": f"{i:08}",
-                    "indices": [
-                        0,
-                        10
+            d["media"].append({
+                "display_url": f"pic.twitter.com/{j:08}",
+                "expanded_url": f"https://twitter.com/{screen_name}/status/{i}{j:07}/video/1",
+                "id_str": f"{i:08}",
+                "indices": [0, 10],
+                "media_key": f"{i:08}",
+                "media_url_https": f"https://pbs.twimg.com/ext_tw_video_thumb/{i}{j:07}/pu/img/{i}{j:07}.jpg",
+                "type": "video",
+                "url": "https://t.co/{j:08}",
+                "video_info": {
+                    "aspect_ratio": [16, 9],
+                    "duration_millis": 16726,
+                    "variants": [
+                        {
+                            "bitrate": 50000,
+                            "content_type": "video/mp4",
+                            "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/vid/1280x720/{i}{j:07}.mp4?tag=12",
+                        },
+                        {
+                            "bitrate": 2000,
+                            "content_type": "video/mp4",
+                            "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/vid/640x360/{i}{j:07}.mp4?tag=12",
+                        },
+                        {
+                            "bitrate": 100,
+                            "content_type": "video/mp4",
+                            "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/vid/480x270/{i}{j:07}.mp4?tag=12",
+                        },
+                        {
+                            "content_type": "application/x-mpegURL",
+                            "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/pl/{i}{j:07}.m3u8?tag=12&container=fmp4",
+                        },
                     ],
-                    "media_key": f"{i:08}",
-                    "media_url_https": f"https://pbs.twimg.com/ext_tw_video_thumb/{i}{j:07}/pu/img/{i}{j:07}.jpg",
-                    "type": "video",
-                    "url": "https://t.co/{j:08}",
-                    "video_info": {
-                        "aspect_ratio": [
-                            16,
-                            9
-                        ],
-                        "duration_millis": 16726,
-                        "variants": [
-                            {
-                                "bitrate": 50000,
-                                "content_type": "video/mp4",
-                                "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/vid/1280x720/{i}{j:07}.mp4?tag=12"
-                            },
-                            {
-                                "bitrate": 2000,
-                                "content_type": "video/mp4",
-                                "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/vid/640x360/{i}{j:07}.mp4?tag=12"
-                            },
-                            {
-                                "bitrate": 100,
-                                "content_type": "video/mp4",
-                                "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/vid/480x270/{i}{j:07}.mp4?tag=12"
-                            },
-                            {
-                                "content_type": "application/x-mpegURL",
-                                "url": f"https://video.twimg.com/ext_tw_video/{i}{j:07}/pu/pl/{i}{j:07}.m3u8?tag=12&container=fmp4"
-                            }
-                        ]
-                    }
-                }
-            )
+                },
+            })
         return d
 
     def make_user_results(user_rest_id: str, user_name: str, screen_name: str):
@@ -475,23 +442,19 @@ def make_sample_file():
                         "media_count": i * 30,
                         "friends_count": i * 10,
                         "followers_count": i * 10,
-                    }
+                    },
                 }
             }
         }
 
-    def make_tweet(id_str: str,
-                   screen_name: str,
-                   is_rt: bool,
-                   is_qt: bool,
-                   is_external_link: bool,
-                   photo_num: int,
-                   video_num: int):
+    def make_tweet(
+        id_str: str, screen_name: str, is_rt: bool, is_qt: bool, is_external_link: bool, photo_num: int, video_num: int
+    ):
         i = int(id_str[0])
         is_media = (photo_num > 0) or (video_num > 0)
         d2 = {
             "rest_id": id_str,
-            "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+            "source": '<a href="https://mobile.twitter.com" rel="nofollow">Twitter Web App</a>',
         }
         user_rest_id = id_str[:-2] + id_str[-1] + id_str[-1]
         core = make_user_results(user_rest_id, f"user_name_{i:02}", screen_name)
@@ -509,65 +472,41 @@ def make_sample_file():
         if is_rt and is_qt:
             rt_id_str = id_str[0] + id_str[0] + id_str[2:]
             qt_id_str = id_str[0] + id_str[1] + id_str[0] + id_str[3:]
-            t = make_tweet(
-                qt_id_str,
-                f"{screen_name}_rt_qt",
-                False,
-                False,
-                False,
-                photo_num,
-                video_num
-            )["tweet_results"]["result"]
+            t = make_tweet(qt_id_str, f"{screen_name}_rt_qt", False, False, False, photo_num, video_num)[
+                "tweet_results"
+            ]["result"]
             legacy["retweeted_status_result"] = {
                 "result": {
                     "quoted_status_result": {
                         "result": t,
                     },
-                } | t | {"rest_id": rt_id_str},
+                }
+                | t
+                | {"rest_id": rt_id_str},
             }
         elif is_qt:
             qt_id_str = id_str[0] + id_str[1] + id_str[0] + id_str[3:]
             d2["quoted_status_result"] = {
-                "result": make_tweet(
-                    qt_id_str,
-                    f"{screen_name}_qt",
-                    False,
-                    False,
-                    False,
-                    photo_num,
-                    video_num
-                )["tweet_results"]["result"]
+                "result": make_tweet(qt_id_str, f"{screen_name}_qt", False, False, False, photo_num, video_num)[
+                    "tweet_results"
+                ]["result"]
             }
         elif is_rt:
             rt_id_str = id_str[0] + id_str[0] + id_str[2:]
             legacy["retweeted_status_result"] = {
-                "result": make_tweet(
-                    rt_id_str,
-                    f"{screen_name}_rt",
-                    False,
-                    False,
-                    False,
-                    photo_num,
-                    video_num
-                )["tweet_results"]["result"]
+                "result": make_tweet(rt_id_str, f"{screen_name}_rt", False, False, False, photo_num, video_num)[
+                    "tweet_results"
+                ]["result"]
             }
 
         d2["core"] = core
         d2["legacy"] = legacy
-        d = {
-            "tweet_results": {
-                "result": d2
-            }
-        }
+        d = {"tweet_results": {"result": d2}}
         return d
 
-    def make_entry(i: int,
-                   screen_name: str,
-                   is_rt: bool,
-                   is_qt: bool,
-                   is_external_link: bool,
-                   photo_num: int,
-                   video_num: int):
+    def make_entry(
+        i: int, screen_name: str, is_rt: bool, is_qt: bool, is_external_link: bool, photo_num: int, video_num: int
+    ):
         id_str = f"{i}{i:04}"
         return {
             "content": {
@@ -576,8 +515,10 @@ def make_sample_file():
                 "itemContent": {
                     "itemType": "TimelineTweet",
                     "__typename": "TimelineTweet",
-                    "tweet_results": make_tweet(id_str, screen_name, is_rt, is_qt, is_external_link, photo_num, video_num)["tweet_results"]
-                }
+                    "tweet_results": make_tweet(
+                        id_str, screen_name, is_rt, is_qt, is_external_link, photo_num, video_num
+                    )["tweet_results"],
+                },
             }
         }
 
@@ -608,15 +549,13 @@ def make_sample_file():
                                     }
                                 ]
                             }
-                        }
+                        },
                     }
                 }
             }
         }
 
-    Path("./test/cache/timeline_sample.json").write_bytes(
-        orjson.dumps(make_timeline(), option=orjson.OPT_INDENT_2)
-    )
+    Path("./tests/cache/timeline_sample.json").write_bytes(orjson.dumps(make_timeline(), option=orjson.OPT_INDENT_2))
 
 
 if __name__ == "__main__":

@@ -1,14 +1,9 @@
-# coding: utf-8
-import re
-from typing import Self
-
-from sqlalchemy import and_, asc, or_
+from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql import func
 
-from personaltwilog.db.Base import Base
-from personaltwilog.db.Model import Metric
+from personaltwilog.db.base import Base
+from personaltwilog.db.model import Metric
 
 
 class MetricDB(Base):
@@ -48,9 +43,11 @@ class MetricDB(Base):
 
         for r in record_list:
             try:
-                q = session.query(Metric).filter(
-                    and_(Metric.registered_at == r.registered_at, Metric.screen_name == r.screen_name)
-                ).with_for_update()
+                q = (
+                    session.query(Metric)
+                    .filter(and_(Metric.registered_at == r.registered_at, Metric.screen_name == r.screen_name))
+                    .with_for_update()
+                )
                 p = q.one()
             except NoResultFound:
                 # INSERT
@@ -59,12 +56,12 @@ class MetricDB(Base):
             else:
                 # UPDATE
                 # idと日付関係以外を更新する
-                p.screen_name = r.screen_name,
-                p.status_count = r.status_count,
-                p.favorite_count = r.favorite_count,
-                p.media_count = r.media_count,
-                p.following_count = r.following_count,
-                p.followers_count = r.followers_count,
+                p.screen_name = (r.screen_name,)
+                p.status_count = (r.status_count,)
+                p.favorite_count = (r.favorite_count,)
+                p.media_count = (r.media_count,)
+                p.following_count = (r.following_count,)
+                p.followers_count = (r.followers_count,)
                 # p.registered_at = r.registered_at
                 result.append(1)
 

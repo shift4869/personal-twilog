@@ -7,7 +7,7 @@ from pathlib import Path
 
 import requests
 
-from personaltwilog.Util import find_values
+from personaltwilog.util import find_values
 
 
 class ParserBase:
@@ -42,7 +42,8 @@ class ParserBase:
 
         seen = []
         dict_list = [
-            d for d in dict_list
+            d
+            for d in dict_list
             if (tweet_id := d.get(dup_target_key, "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
         ]
         return dict_list
@@ -216,16 +217,13 @@ class ParserBase:
                     },
                 },
             }:
-                retweet_tweet_result = tweet.get("legacy", {}) \
-                                            .get("retweeted_status_result", {}) \
-                                            .get("result", {})
+                retweet_tweet_result = tweet.get("legacy", {}).get("retweeted_status_result", {}).get("result", {})
                 retweet_tweet = retweet_tweet_result
                 quote_tweet = quote_tweet_result
         return (retweet_tweet, quote_tweet)
 
     def _get_created_at(self, tweet: dict) -> str:
-        """tweet に含まれる created_at を返す
-        """
+        """tweet に含まれる created_at を返す"""
         if not isinstance(tweet, dict):
             raise TypeError("Argument tweet is not dict.")
 

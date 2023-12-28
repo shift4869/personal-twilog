@@ -1,12 +1,9 @@
-# coding: utf-8
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
-from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 
-from personaltwilog.db.Model import Base as ModelBase
+from personaltwilog.db.model import Base as ModelBase
 
 
 class Base(metaclass=ABCMeta):
@@ -22,7 +19,7 @@ class Base(metaclass=ABCMeta):
             connect_args={
                 "timeout": 30,
                 "check_same_thread": False,
-            }
+            },
         )
         ModelBase.metadata.create_all(self.engine)
 

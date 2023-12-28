@@ -1,4 +1,3 @@
-# coding: utf-8
 import pprint
 from logging import INFO, getLogger
 from pathlib import Path
@@ -7,16 +6,16 @@ from typing import Any
 import orjson
 from twitter.scraper import Scraper
 
-from personaltwilog.webapi.valueobject.ScreenName import ScreenName
-from personaltwilog.webapi.valueobject.Token import Token
-from personaltwilog.webapi.valueobject.UserId import UserId
-from personaltwilog.webapi.valueobject.UserName import UserName
+from personaltwilog.webapi.valueobject.screen_name import ScreenName
+from personaltwilog.webapi.valueobject.token import Token
+from personaltwilog.webapi.valueobject.user_id import UserId
+from personaltwilog.webapi.valueobject.user_name import UserName
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 
 
-class TwitterAPI():
+class TwitterAPI:
     authorize_screen_name: ScreenName
     token: Token
 
@@ -44,6 +43,7 @@ class TwitterAPI():
                 for element in inner_list:
                     inner_result.extend(_inner_helper(element, inner_key, []))
             return inner_result
+
         return _inner_helper(obj, key, [])
 
     def _get_user(self, screen_name: ScreenName | str) -> dict:
@@ -142,6 +142,7 @@ class TwitterAPI():
 
 if __name__ == "__main__":
     import logging.config
+
     logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
 
     CONFIG_FILE_NAME = "./config/config.json"

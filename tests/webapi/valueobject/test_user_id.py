@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from personaltwilog.webapi.valueobject.UserId import UserId
+from personaltwilog.webapi.valueobject.user_id import UserId
 
 
 class TestUserId(unittest.TestCase):

@@ -8,9 +8,9 @@ import freezegun
 import orjson
 from mock import MagicMock, call, patch
 
-from personaltwilog.TimelineCrawler import CrawlResultStatus, TimelineCrawler
+from personaltwilog.timeline_crawler import CrawlResultStatus, TimelineCrawler
 
-logger = getLogger("personaltwilog.TimelineCrawler")
+logger = getLogger("personaltwilog.timeline_crawler")
 
 
 class TestTimelineCrawler(unittest.TestCase):
@@ -21,17 +21,8 @@ class TestTimelineCrawler(unittest.TestCase):
         return {
             "twitter_api_client_list": [
                 {
-                    "authorize": {
-                        "screen_name": authorize_screen_name,
-                        "ct0": ct0,
-                        "auth_token": auth_token
-                    },
-                    "target": [
-                        {
-                            "screen_name": "target_screen_name",
-                            "status": "enable"
-                        }
-                    ]
+                    "authorize": {"screen_name": authorize_screen_name, "ct0": ct0, "auth_token": auth_token},
+                    "target": [{"screen_name": "target_screen_name", "status": "enable"}],
                 }
             ]
         }
@@ -39,39 +30,39 @@ class TestTimelineCrawler(unittest.TestCase):
     def get_instance(self) -> TimelineCrawler:
         with ExitStack() as stack:
             mock_logger = stack.enter_context(patch.object(logger, "info"))
-            mock_path = stack.enter_context(patch("personaltwilog.TimelineCrawler.Path"))
-            mock_orjson = stack.enter_context(patch("personaltwilog.TimelineCrawler.orjson"))
-            mock_twitter = stack.enter_context(patch("personaltwilog.TimelineCrawler.TwitterAPI"))
-            mock_tweet_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.TweetDB"))
-            mock_likes_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.LikesDB"))
-            mock_media_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.MediaDB"))
-            mock_metric_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.MetricDB"))
-            mock_external_link_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.ExternalLinkDB"))
+            mock_path = stack.enter_context(patch("personaltwilog.timeline_crawler.Path"))
+            mock_orjson = stack.enter_context(patch("personaltwilog.timeline_crawler.orjson"))
+            mock_twitter = stack.enter_context(patch("personaltwilog.timeline_crawler.TwitterAPI"))
+            mock_tweet_db = stack.enter_context(patch("personaltwilog.timeline_crawler.TweetDB"))
+            mock_likes_db = stack.enter_context(patch("personaltwilog.timeline_crawler.LikesDB"))
+            mock_media_db = stack.enter_context(patch("personaltwilog.timeline_crawler.MediaDB"))
+            mock_metric_db = stack.enter_context(patch("personaltwilog.timeline_crawler.MetricDB"))
+            mock_external_link_db = stack.enter_context(patch("personaltwilog.timeline_crawler.ExternalLinkDB"))
             stack.enter_context(freezegun.freeze_time("2023-10-07T01:00:00"))
 
             sample_config_json = self.get_config_json()
             mock_orjson.loads.side_effect = lambda byte_data: sample_config_json
             crawler = TimelineCrawler()
 
-            crawler.TIMELINE_CACHE_FILE_PATH = "./test/cache/timeline_response.json"
-            crawler.LIKES_CACHE_FILE_PATH = "./test/cache/likes_response.json"
+            crawler.TIMELINE_CACHE_FILE_PATH = "./tests/cache/timeline_response.json"
+            crawler.LIKES_CACHE_FILE_PATH = "./tests/cache/likes_response.json"
 
             return crawler
 
     def get_json_dict(self) -> dict:
-        return orjson.loads(Path("./test/cache/users_sample.json").read_bytes())
+        return orjson.loads(Path("./tests/cache/users_sample.json").read_bytes())
 
     def test_init(self):
         with ExitStack() as stack:
             mock_logger = stack.enter_context(patch.object(logger, "info"))
-            mock_path = stack.enter_context(patch("personaltwilog.TimelineCrawler.Path"))
-            mock_orjson = stack.enter_context(patch("personaltwilog.TimelineCrawler.orjson"))
-            mock_twitter = stack.enter_context(patch("personaltwilog.TimelineCrawler.TwitterAPI"))
-            mock_tweet_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.TweetDB"))
-            mock_likes_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.LikesDB"))
-            mock_media_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.MediaDB"))
-            mock_metric_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.MetricDB"))
-            mock_external_link_db = stack.enter_context(patch("personaltwilog.TimelineCrawler.ExternalLinkDB"))
+            mock_path = stack.enter_context(patch("personaltwilog.timeline_crawler.Path"))
+            mock_orjson = stack.enter_context(patch("personaltwilog.timeline_crawler.orjson"))
+            mock_twitter = stack.enter_context(patch("personaltwilog.timeline_crawler.TwitterAPI"))
+            mock_tweet_db = stack.enter_context(patch("personaltwilog.timeline_crawler.TweetDB"))
+            mock_likes_db = stack.enter_context(patch("personaltwilog.timeline_crawler.LikesDB"))
+            mock_media_db = stack.enter_context(patch("personaltwilog.timeline_crawler.MediaDB"))
+            mock_metric_db = stack.enter_context(patch("personaltwilog.timeline_crawler.MetricDB"))
+            mock_external_link_db = stack.enter_context(patch("personaltwilog.timeline_crawler.ExternalLinkDB"))
             stack.enter_context(freezegun.freeze_time("2023-10-07T01:00:00"))
 
             authorize_screen_name = "screen_name_1"
@@ -99,8 +90,8 @@ class TestTimelineCrawler(unittest.TestCase):
     def test_timeline_crawl(self):
         with ExitStack() as stack:
             mock_logger = stack.enter_context(patch.object(logger, "info"))
-            mock_path = stack.enter_context(patch("personaltwilog.TimelineCrawler.Path"))
-            mock_orjson = stack.enter_context(patch("personaltwilog.TimelineCrawler.orjson"))
+            mock_path = stack.enter_context(patch("personaltwilog.timeline_crawler.Path"))
+            mock_orjson = stack.enter_context(patch("personaltwilog.timeline_crawler.orjson"))
             crawler = self.get_instance()
             crawler.twitter = (mock_twitter := MagicMock())
             crawler.tweet_db = (mock_tweet_db := MagicMock())
@@ -111,10 +102,12 @@ class TestTimelineCrawler(unittest.TestCase):
             mock_twitter.get_user_timeline.side_effect = lambda screen_name, limit, min_id: ["tweet_list_1", ""]
             screen_name = "target_screen_name"
 
-            mock_tweet_parser = stack.enter_context(patch("personaltwilog.TimelineCrawler.TweetParser"))
-            mock_media_parser = stack.enter_context(patch("personaltwilog.TimelineCrawler.MediaParser"))
-            mock_external_link_parser = stack.enter_context(patch("personaltwilog.TimelineCrawler.ExternalLinkParser"))
-            mock_metric_parser = stack.enter_context(patch("personaltwilog.TimelineCrawler.MetricParser"))
+            mock_tweet_parser = stack.enter_context(patch("personaltwilog.timeline_crawler.TweetParser"))
+            mock_media_parser = stack.enter_context(patch("personaltwilog.timeline_crawler.MediaParser"))
+            mock_external_link_parser = stack.enter_context(
+                patch("personaltwilog.timeline_crawler.ExternalLinkParser")
+            )
+            mock_metric_parser = stack.enter_context(patch("personaltwilog.timeline_crawler.MetricParser"))
             actual = crawler.timeline_crawl(screen_name)
             self.assertEqual(CrawlResultStatus.DONE, actual)
 
@@ -141,7 +134,7 @@ class TestTimelineCrawler(unittest.TestCase):
             mock_twitter.get_user_timeline.side_effect = lambda screen_name, limit, min_id: [""]
             actual = crawler.timeline_crawl(screen_name)
             self.assertEqual(CrawlResultStatus.NO_UPDATE, actual)
-    
+
             self.assertEqual([call.__bool__(), call.get_user_timeline(screen_name, 300, 100)], mock_twitter.mock_calls)
             mock_tweet_parser.assert_not_called()
             mock_media_parser.assert_not_called()
@@ -155,8 +148,8 @@ class TestTimelineCrawler(unittest.TestCase):
     def test_likes_crawl(self):
         with ExitStack() as stack:
             mock_logger = stack.enter_context(patch.object(logger, "info"))
-            mock_path = stack.enter_context(patch("personaltwilog.TimelineCrawler.Path"))
-            mock_orjson = stack.enter_context(patch("personaltwilog.TimelineCrawler.orjson"))
+            mock_path = stack.enter_context(patch("personaltwilog.timeline_crawler.Path"))
+            mock_orjson = stack.enter_context(patch("personaltwilog.timeline_crawler.orjson"))
             crawler = self.get_instance()
             crawler.twitter = (mock_twitter := MagicMock())
             crawler.likes_db = (mock_likes_db := MagicMock())
@@ -166,18 +159,23 @@ class TestTimelineCrawler(unittest.TestCase):
             mock_twitter.get_likes.side_effect = lambda screen_name, limit, min_id: ["tweet_list_1", ""]
             screen_name = "target_screen_name"
 
-            mock_likes_parser = stack.enter_context(patch("personaltwilog.TimelineCrawler.LikesParser"))
-            mock_media_parser = stack.enter_context(patch("personaltwilog.TimelineCrawler.MediaParser"))
-            mock_external_link_parser = stack.enter_context(patch("personaltwilog.TimelineCrawler.ExternalLinkParser"))
+            mock_likes_parser = stack.enter_context(patch("personaltwilog.timeline_crawler.LikesParser"))
+            mock_media_parser = stack.enter_context(patch("personaltwilog.timeline_crawler.MediaParser"))
+            mock_external_link_parser = stack.enter_context(
+                patch("personaltwilog.timeline_crawler.ExternalLinkParser")
+            )
             actual = crawler.likes_crawl(screen_name)
             self.assertEqual(CrawlResultStatus.DONE, actual)
 
-            self.assertEqual([
-                call.__bool__(),
-                call.get_likes(screen_name, 300, 100),
-                call.get_user_id(screen_name),
-                call.get_user_name(screen_name),
-            ], mock_twitter.mock_calls)
+            self.assertEqual(
+                [
+                    call.__bool__(),
+                    call.get_likes(screen_name, 300, 100),
+                    call.get_user_id(screen_name),
+                    call.get_user_name(screen_name),
+                ],
+                mock_twitter.mock_calls,
+            )
             mock_likes_parser.assert_called_once()
             mock_media_parser.assert_called_once()
             mock_external_link_parser.assert_called_once()
@@ -196,7 +194,7 @@ class TestTimelineCrawler(unittest.TestCase):
             mock_twitter.get_likes.side_effect = lambda screen_name, limit, min_id: [""]
             actual = crawler.likes_crawl(screen_name)
             self.assertEqual(CrawlResultStatus.NO_UPDATE, actual)
-    
+
             self.assertEqual([call.__bool__(), call.get_likes(screen_name, 300, 100)], mock_twitter.mock_calls)
             mock_likes_parser.assert_not_called()
             mock_media_parser.assert_not_called()
@@ -208,8 +206,12 @@ class TestTimelineCrawler(unittest.TestCase):
     def test_run(self):
         with ExitStack() as stack:
             mock_logger = stack.enter_context(patch.object(logger, "info"))
-            mock_timeline_crawl = stack.enter_context(patch("personaltwilog.TimelineCrawler.TimelineCrawler.timeline_crawl"))
-            mock_likes_crawl = stack.enter_context(patch("personaltwilog.TimelineCrawler.TimelineCrawler.likes_crawl"))
+            mock_timeline_crawl = stack.enter_context(
+                patch("personaltwilog.timeline_crawler.TimelineCrawler.timeline_crawl")
+            )
+            mock_likes_crawl = stack.enter_context(
+                patch("personaltwilog.timeline_crawler.TimelineCrawler.likes_crawl")
+            )
             crawler = self.get_instance()
 
             actual = crawler.run()
