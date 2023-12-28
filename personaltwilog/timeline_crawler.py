@@ -28,7 +28,7 @@ class CrawlResultStatus(Enum):
     DONE = auto()
 
 
-class TimelineCrawler():
+class TimelineCrawler:
     TIMELINE_CACHE_FILE_PATH = "./cache/timeline_response.json"
     LIKES_CACHE_FILE_PATH = "./cache/likes_response.json"
 
@@ -77,9 +77,7 @@ class TimelineCrawler():
                     orjson.dumps(tweet_list, option=orjson.OPT_INDENT_2)
                 )
         else:
-            tweet_list = orjson.loads(
-                Path(TimelineCrawler.TIMELINE_CACHE_FILE_PATH).read_bytes()
-            )
+            tweet_list = orjson.loads(Path(TimelineCrawler.TIMELINE_CACHE_FILE_PATH).read_bytes())
 
         if not tweet_list:
             logger.info(f"Getting timeline of '{screen_name}' -> done")
@@ -137,9 +135,7 @@ class TimelineCrawler():
                     orjson.dumps(tweet_list, option=orjson.OPT_INDENT_2)
                 )
         else:
-            tweet_list = orjson.loads(
-                Path(TimelineCrawler.LIKES_CACHE_FILE_PATH).read_bytes()
-            )
+            tweet_list = orjson.loads(Path(TimelineCrawler.LIKES_CACHE_FILE_PATH).read_bytes())
 
         if not tweet_list:
             logger.info(f"Getting Likes of '{screen_name}' -> done")
@@ -183,7 +179,7 @@ class TimelineCrawler():
         target_dicts = self.config["target"]  # TODO::authorize複数対応
         for target_dict in target_dicts:
             target_screen_name = target_dict["screen_name"]
-            is_enable = ("enable" == target_dict["status"])
+            is_enable = "enable" == target_dict["status"]
 
             if not is_enable:
                 logger.info(f"Status is not enable , target screen_name = '{target_screen_name}' -> skip")
