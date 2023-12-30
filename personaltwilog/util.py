@@ -1,4 +1,10 @@
+from enum import Enum, auto
 from typing import Any
+
+
+class Result(Enum):
+    SUCCESS = auto()
+    FAILED = auto()
 
 
 def find_values(

@@ -3,13 +3,14 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from personaltwilog.db.base import Base
 from personaltwilog.db.model import Likes
+from personaltwilog.util import Result
 
 
 class LikesDB(Base):
-    def __init__(self, db_path: str = "timeline.db"):
+    def __init__(self, db_path: str = "timeline.db") -> None:
         super().__init__(db_path)
 
-    def select(self):
+    def select(self) -> list[dict]:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
         result = session.query(Likes).all()
@@ -21,29 +22,31 @@ class LikesDB(Base):
         session = Session()
         r = session.query(Likes).filter(Likes.screen_name == screen_name).order_by(Likes.id.desc()).first()
         session.close()
-        result = r.tweet_id or 0
+        if not r:
+            return 0
+        result = r.tweet_id
         return int(result)
 
-    def upsert(self, record: Likes | list[dict]) -> list[int]:
+    def upsert(self, record: list[dict]) -> Result:
         """upsert
 
         Args:
-            record (Likes | list[dict]): 投入レコード、またはレコード辞書のリスト
+            record (list[dict]): レコード辞書のリスト
 
         Returns:
-            list[int]: レコードに対応した投入結果のリスト
-                       追加したレコードは0、更新したレコードは1が入る
+            Result: upsert に成功したなら Result.SUCCESS, そうでないなら Result.FAILED
         """
-        result: list[int] = []
-        record_list: list[Likes] = []
-        if isinstance(record, Likes):
-            record_list = [record]
-        elif isinstance(record, list):
-            if len(record) == 0:
-                return []
-            if not isinstance(record[0], dict):
-                return []
-            record_list = [Likes.create(r) for r in record]
+        if not isinstance(record, list):
+            return Result.FAILED
+        if record == []:
+            # 空リストは0レコードupsert完了とみなして正常終了扱い
+            return Result.SUCCESS
+
+        all_dict_flag = all([isinstance(r, dict) for r in record])
+        if not all_dict_flag:
+            return Result.FAILED
+
+        record_list: list[Likes] = [Likes.create(r) for r in record]
 
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
@@ -55,7 +58,6 @@ class LikesDB(Base):
             except NoResultFound:
                 # INSERT
                 session.add(r)
-                result.append(0)
             else:
                 # UPDATE
                 # idと日付関係以外を更新する
@@ -77,8 +79,7 @@ class LikesDB(Base):
                 # p.created_at = r.created_at
                 # p.appeared_at = r.appeared_at
                 # p.registered_at = r.registered_at
-                result.append(1)
 
         session.commit()
         session.close()
-        return result
+        return Result.SUCCESS

@@ -1,17 +1,14 @@
 import re
 from datetime import datetime, timedelta
-from logging import INFO, getLogger
 from pathlib import Path
-from typing import Any, Self
+from typing import Self
 
 import orjson
 from sqlalchemy import Column, Integer, String, create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from tqdm import tqdm
 
-logger = getLogger(__name__)
-logger.setLevel(INFO)
-
+from personaltwilog.util import Result, find_values
 
 Base = declarative_base()
 date_str = datetime.now().strftime("%Y%m%d")
@@ -77,11 +74,11 @@ class ArchivedTweet(Base):
 
     @classmethod
     def create(cls, entry: dict) -> Self:
-        tweet_dict = find_values(entry, "tweet", [""], [], True)
-        tweet_id = find_values(tweet_dict, "id_str", [""], [], True)
-        tweet_text = find_values(tweet_dict, "full_text", [""], [], True)
+        tweet_dict = find_values(entry, "tweet", True, [""], [])
+        tweet_id = find_values(tweet_dict, "id_str", True, [""], [])
+        tweet_text = find_values(tweet_dict, "full_text", True, [""], [])
 
-        source = find_values(tweet_dict, "source", [""], [], True)
+        source = find_values(tweet_dict, "source", True, [""], [])
         tweet_via = re.findall(r"<[^>]+>(.*?)<\/[^<]+>", source)[0]
 
         user_id = "175674367"
@@ -91,7 +88,7 @@ class ArchivedTweet(Base):
         tweet_url = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
         src_format = "%a %b %d %H:%M:%S %z %Y"
-        created_at_str = find_values(tweet_dict, "created_at", [""], [], True)
+        created_at_str = find_values(tweet_dict, "created_at", True, [""], [])
         gmt = datetime.strptime(created_at_str, src_format)
         jst = gmt + timedelta(hours=9)
         created_at = jst.isoformat().replace("+00:00", "")
@@ -100,10 +97,10 @@ class ArchivedTweet(Base):
 
         # RT の構造解析は厳密には行わない
         is_retweet = re.findall(r"^RT @(.*)", tweet_text) != []
-        source_status_ids = find_values(tweet_dict, "source_status_id_str", [], [], False)
+        source_status_ids = find_values(tweet_dict, "source_status_id_str", False, [], [])
         retweet_tweet_id = source_status_ids[0] if len(source_status_ids) > 0 and is_retweet else ""
 
-        expanded_urls = find_values(tweet_dict, "expanded_url", [], [], False)
+        expanded_urls = find_values(tweet_dict, "expanded_url", False, [], [])
         contain_twitter_url_flag = [
             (re.findall(r"^https://twitter.com/(.*)/status/(\d*)$", url) != []) for url in expanded_urls
         ]
@@ -114,11 +111,11 @@ class ArchivedTweet(Base):
                 if m := re.findall(r"^https://twitter.com/(.*)/status/(\d*)$", url):
                     quote_tweet_id = m[0][1]
 
-        media = find_values(tweet_dict, "media", [], [], False)
+        media = find_values(tweet_dict, "media", False, [], [])
         has_media = media != []
 
-        entities = find_values(tweet_dict, "entities", [], [], False)
-        external_link = find_values(entities, "expanded_url", [], [], False)
+        entities = find_values(tweet_dict, "entities", False, [], [])
+        external_link = find_values(entities, "expanded_url", False, [], [])
         has_external_link = external_link != []
 
         return ArchivedTweet(
@@ -141,51 +138,13 @@ class ArchivedTweet(Base):
         )
 
 
-def find_values(
-    obj: Any,
-    key: str,
-    key_white_list: list[str] = None,
-    key_black_list: list[str] = None,
-    is_predict_one: bool = False,
-) -> list[Any]:
-    if not key_white_list:
-        key_white_list = []
-    if not key_black_list:
-        key_black_list = []
+def main(input_base_path: Path, output_db_path: Path) -> Result:
+    """PersonalTwilog 用にアーカイブからロードする
 
-    def _inner_helper(inner_obj: Any, inner_key: str, inner_result: list) -> list[Any]:
-        if isinstance(inner_obj, dict) and (inner_dict := inner_obj):
-            for k, v in inner_dict.items():
-                if k == inner_key:
-                    inner_result.append(v)
-                if key_white_list and (k not in key_white_list):
-                    continue
-                if k in key_black_list:
-                    continue
-                inner_result.extend(_inner_helper(v, inner_key, []))
-        if isinstance(inner_obj, list) and (inner_list := inner_obj):
-            for element in inner_list:
-                inner_result.extend(_inner_helper(element, inner_key, []))
-        return inner_result
-
-    result = _inner_helper(obj, key, [])
-    if not is_predict_one:
-        return result
-    if len(result) == 0:
-        raise ValueError(f"obj has not value of key='{key}'.")
-    if len(result) > 1:
-        raise ValueError(f"obj has multiple values of key='{key}'.")
-    return result[0]
-
-
-if __name__ == "__main__":
-    # PersonalTwilog 用にアーカイブからロードする
-    import logging.config
-
-    logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
-
-    input_base_path = Path("I:/Users/shift/Documents/twitter_backup/twitter-2023-09-22")
-    output_db_path = Path("D:/Users/shift/Documents/git/PersonalTwilog/timeline.db")
+    Args:
+        input_base_path (Path): 入力アーカイブのベースパス
+        output_db_path (Path): 結果反映先のDBパス
+    """
 
     # DB生成
     engine = create_engine(f"sqlite:///{output_db_path}")
@@ -223,3 +182,10 @@ if __name__ == "__main__":
     session.commit()
     session.close()
     print("DB commit done.")
+    return Result.SUCCESS
+
+
+if __name__ == "__main__":
+    input_base_path = Path("I:/Users/shift/Documents/twitter_backup/twitter-2023-09-22")
+    output_db_path = Path("D:/Users/shift/Documents/git/PersonalTwilog/timeline.db")
+    main(input_base_path, output_db_path)

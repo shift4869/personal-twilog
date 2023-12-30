@@ -524,7 +524,7 @@ class ExternalLink(Base):
                 raise ValueError("Unmatch args_dict.")
 
     def __repr__(self):
-        return f"<Metric(created_at='{self.created_at}')>"
+        return f"<ExternalLink(external_link_url='{self.external_link_url}')>"
 
     def __eq__(self, other):
         return (

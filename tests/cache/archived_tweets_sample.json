@@ -1,0 +1,129 @@
+window.YTD.tweets.part0 = [
+  {
+    "tweet" : {
+      "retweeted" : false,
+      "source" : "<a href=\"http://janetter.net/\" rel=\"nofollow\">Janetter</a>",
+      "entities" : {
+        "user_mentions" : [
+          {
+            "name" : "RT先ユーザー",
+            "screen_name" : "username_RT",
+            "id_str" : "10000",
+            "id" : "10000"
+          }
+        ],
+        "urls" : [ ]
+      },
+      "favorite_count" : "0",
+      "id_str" : "11111",
+      "truncated" : false,
+      "retweet_count" : "0",
+      "id" : "11111",
+      "created_at" : "Sat Apr 28 12:00:21 +0000 2018",
+      "favorited" : false,
+      "full_text" : "RT @username_RT: サンプルテキスト",
+      "lang" : "ja"
+    }
+  },
+  {
+    "tweet" : {
+      "retweeted" : false,
+      "source" : "<a href=\"http://janetter.net/\" rel=\"nofollow\">Janetter</a>",
+      "entities" : {
+        "user_mentions" : [
+          {
+            "name" : "ユーザー1",
+            "screen_name" : "username_1",
+            "id_str" : "-1",
+            "id" : "-1"
+          }
+        ],
+        "urls" : [ ],
+        "media" : [
+          {
+            "expanded_url" : "https://twitter.com/username_1/status/22222/photo/1",
+            "source_status_id" : "22222",
+            "url" : "https://t.co/sample",
+            "media_url" : "http://pbs.twimg.com/media/00002.jpg",
+            "id_str" : "22222",
+            "source_user_id" : "22222",
+            "id" : "22222",
+            "media_url_https" : "https://pbs.twimg.com/media/00002.jpg",
+            "source_user_id_str" : "20000",
+            "type" : "photo",
+            "source_status_id_str" : "22222",
+            "display_url" : "pic.twitter.com/sample"
+          }
+        ]
+      },
+      "favorite_count" : "0",
+      "id_str" : "22222",
+      "truncated" : false,
+      "retweet_count" : "0",
+      "id" : "22222",
+      "possibly_sensitive" : true,
+      "created_at" : "Sat Apr 28 11:26:57 +0000 2018",
+      "favorited" : false,
+      "full_text" : "RT @username_1: サンプルテキスト https://t.co/sample",
+      "lang" : "ja",
+      "extended_entities" : {
+        "media" : [
+          {
+            "expanded_url" : "https://twitter.com/username_1/status/22222/photo/1",
+            "source_status_id" : "22222",
+            "url" : "https://t.co/sample",
+            "media_url" : "http://pbs.twimg.com/media/00002.jpg",
+            "id_str" : "22222",
+            "source_user_id" : "22222",
+            "id" : "22222",
+            "media_url_https" : "https://pbs.twimg.com/media/00002.jpg",
+            "source_user_id_str" : "20000",
+            "type" : "photo",
+            "source_status_id_str" : "22222",
+            "display_url" : "pic.twitter.com/sample"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "tweet" : {
+      "retweeted" : false,
+      "source" : "<a href=\"http://janetter.net/\" rel=\"nofollow\">Janetter</a>",
+      "entities" : {
+        "hashtags" : [ ],
+        "symbols" : [ ],
+        "user_mentions" : [
+          {
+            "name" : "ユーザー2",
+            "screen_name" : "username_2",
+            "id_str" : "30000",
+            "id" : "30000"
+          }
+        ],
+        "urls" : [
+          {
+            "url" : "https://t.co/sample",
+            "expanded_url" : "https://twitter.com/username_2/status/33333",
+            "display_url" : "twitter.com/username_2/statu…"
+          },
+          {
+            "url" : "https://t.co/sample2",
+            "expanded_url" : "https://twitter.com/username_2/status/33333/photo/1",
+            "display_url" : "twitter.com/username_2/statu…"
+          }
+        ]
+      },
+      "favorite_count" : "0",
+      "id_str" : "33333",
+      "truncated" : false,
+      "retweet_count" : "0",
+      "id" : "33333",
+      "possibly_sensitive" : true,
+      "created_at" : "Sat Apr 28 09:43:05 +0000 2018",
+      "favorited" : false,
+      "full_text" : "RT @username_2: サンプルテキスト https://t.co/sample",
+      "lang" : "ja"
+    }
+  }
+]

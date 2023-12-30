@@ -4,39 +4,40 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from personaltwilog.db.base import Base
 from personaltwilog.db.model import Metric
+from personaltwilog.util import Result
 
 
 class MetricDB(Base):
-    def __init__(self, db_path: str = "timeline.db"):
+    def __init__(self, db_path: str = "timeline.db") -> None:
         super().__init__(db_path)
 
-    def select(self):
+    def select(self) -> list[dict]:
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
         result = session.query(Metric).all()
         session.close()
         return result
 
-    def upsert(self, record: Metric | list[dict]) -> list[int]:
+    def upsert(self, record: list[dict]) -> Result:
         """upsert
 
         Args:
-            record (Metric | list[dict]): 投入レコード、またはレコード辞書のリスト
+            record (list[dict]): レコード辞書のリスト
 
         Returns:
-            list[int]: レコードに対応した投入結果のリスト
-                       追加したレコードは0、更新したレコードは1が入る
+            Result: upsert に成功したなら Result.SUCCESS, そうでないなら Result.FAILED
         """
-        result: list[int] = []
-        record_list: list[Metric] = []
-        if isinstance(record, Metric):
-            record_list = [record]
-        elif isinstance(record, list):
-            if len(record) == 0:
-                return []
-            if not isinstance(record[0], dict):
-                return []
-            record_list = [Metric.create(r) for r in record]
+        if not isinstance(record, list):
+            return Result.FAILED
+        if record == []:
+            # 空リストは0レコードupsert完了とみなして正常終了扱い
+            return Result.SUCCESS
+
+        all_dict_flag = all([isinstance(r, dict) for r in record])
+        if not all_dict_flag:
+            return Result.FAILED
+
+        record_list: list[Metric] = [Metric.create(r) for r in record]
 
         Session = sessionmaker(bind=self.engine, autoflush=False)
         session = Session()
@@ -52,19 +53,17 @@ class MetricDB(Base):
             except NoResultFound:
                 # INSERT
                 session.add(r)
-                result.append(0)
             else:
                 # UPDATE
                 # idと日付関係以外を更新する
-                p.screen_name = (r.screen_name,)
-                p.status_count = (r.status_count,)
-                p.favorite_count = (r.favorite_count,)
-                p.media_count = (r.media_count,)
-                p.following_count = (r.following_count,)
-                p.followers_count = (r.followers_count,)
+                p.screen_name = r.screen_name
+                p.status_count = r.status_count
+                p.favorite_count = r.favorite_count
+                p.media_count = r.media_count
+                p.following_count = r.following_count
+                p.followers_count = r.followers_count
                 # p.registered_at = r.registered_at
-                result.append(1)
 
         session.commit()
         session.close()
-        return result
+        return Result.SUCCESS
