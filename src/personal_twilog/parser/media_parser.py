@@ -4,27 +4,28 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.parser_base import ParserBase
-from personaltwilog.util import find_values
+from personal_twilog.parser.parser_base import ParserBase
+from personal_twilog.util import find_values
 
 
-class ExternalLinkParser(ParserBase):
+class MediaParser(ParserBase):
     def __init__(self, tweet_dict_list: list[dict], registered_at: str) -> None:
         super().__init__(tweet_dict_list, registered_at)
 
     def parse(self) -> list[dict]:
+        """flattened_tweet_list を解釈して DB の Media テーブルに投入するための list[dict] を返す"""
         flattened_tweet_list = self._flatten(self.tweet_dict_list)
-        external_link_dict_list = []
+        media_dict_list = []
         for tweet in flattened_tweet_list:
             if not tweet:
                 continue
 
             tweet_legacy: dict = tweet["legacy"]
 
-            # tweet が外部リンクを持つかどうか
-            entities: dict = tweet_legacy.get("entities", {})
-            expanded_urls = self._match_entities(entities).get("expanded_urls", [])
-            if not expanded_urls:
+            # tweet がメディアを持つかどうか
+            extended_entities: dict = tweet_legacy.get("extended_entities", {})
+            media_list = extended_entities.get("media", [])
+            if not media_list:
                 continue
 
             tweet_user: dict = tweet["core"]["user_results"]["result"]
@@ -40,25 +41,36 @@ class ExternalLinkParser(ParserBase):
             created_at = self._get_created_at(tweet)
             appeared_at = tweet["appeared_at"]
 
-            for expanded_url in expanded_urls:
-                external_link_url = expanded_url
-                external_link_type = self._get_external_link_type(external_link_url)
-                external_link_dict = {
+            for media in media_list:
+                media_info = self._match_media(media)
+                if not media_info:
+                    continue
+
+                media_filename = media_info["media_filename"]
+                media_url = media_info["media_url"]
+                media_thumbnail_url = media_info["media_thumbnail_url"]
+                media_type = media_info["media_type"]
+                media_size = self._get_media_size(media_url)
+
+                media_dict = {
                     "tweet_id": tweet_id,
                     "tweet_text": tweet_text,
                     "tweet_via": tweet_via,
                     "tweet_url": tweet_url,
-                    "external_link_url": external_link_url,
-                    "external_link_type": external_link_type,
+                    "media_filename": media_filename,
+                    "media_url": media_url,
+                    "media_thumbnail_url": media_thumbnail_url,
+                    "media_type": media_type,
+                    "media_size": media_size,
                     "created_at": created_at,
                     "appeared_at": appeared_at,
                     "registered_at": self.registered_at,
                 }
-                external_link_dict_list.append(external_link_dict)
+                media_dict_list.append(media_dict)
 
-        external_link_dict_list = self._remove_duplicates(external_link_dict_list)
-        external_link_dict_list.reverse()
-        return external_link_dict_list
+        media_dict_list = self._remove_duplicates(media_dict_list)
+        media_dict_list.reverse()
+        return media_dict_list
 
 
 if __name__ == "__main__":
@@ -75,6 +87,6 @@ if __name__ == "__main__":
         if data_dict:
             tweet_list.append(data_dict)
 
-    parser = ExternalLinkParser(tweet_list, datetime.now().replace(microsecond=0).isoformat())
+    parser = MediaParser(tweet_list, datetime.now().replace(microsecond=0).isoformat())
     dict_list = parser.parse()
     print(len(dict_list))

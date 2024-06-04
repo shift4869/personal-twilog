@@ -4,8 +4,8 @@ from typing import Any
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 
-from personaltwilog.db.model import Base as ModelBase
-from personaltwilog.util import Result
+from personal_twilog.db.model import Base as ModelBase
+from personal_twilog.util import Result
 
 
 class Base(metaclass=ABCMeta):

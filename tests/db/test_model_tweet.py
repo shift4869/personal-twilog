@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from personaltwilog.db.model import Tweet
+from personal_twilog.db.model import Tweet
 
 
 class TestTweet(unittest.TestCase):

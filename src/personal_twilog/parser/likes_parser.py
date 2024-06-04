@@ -4,8 +4,8 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.parser_base import ParserBase
-from personaltwilog.util import find_values
+from personal_twilog.parser.parser_base import ParserBase
+from personal_twilog.util import find_values
 
 
 class LikesParser(ParserBase):

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import requests
 
-from personaltwilog.util import find_values
+from personal_twilog.util import find_values
 
 
 class ParserBase:

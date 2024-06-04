@@ -1,26 +1,29 @@
-[tool.poetry]
-name = "personaltwilog"
+[project]
+name = "personal-twilog"
 version = "0.1.0"
 description = "personal twilog"
-authors = ["shift <fantasy_world4423-git@yahoo.co.jp>"]
-license = "MIT LICENSE"
+authors = [
+    { name = "shift" }
+]
+dependencies = [
+    "coverage>=7.5.3",
+    "freezegun>=1.5.1",
+    "httpx>=0.27.0",
+    "isort>=5.13.2",
+    "mock>=5.1.0",
+    "orjson>=3.10.3",
+    "pycodestyle>=2.11.1",
+    "requests>=2.32.3",
+    "ruff>=0.4.7",
+    "sqlalchemy>=2.0.30",
+    "twitter-api-client>=0.10.22",
+]
 readme = "README.md"
+requires-python = ">= 3.12"
 
-[tool.poetry.dependencies]
-coverage = "^7.4.4"
-freezegun = "^1.4.0"
-httpx = "^0.25.2"
-isort = "^5.13.2"
-mock = "^5.0.1"
-orjson = "^3.10.1"
-pycodestyle = "^2.11.1"
-python = ">=3.11,<4.0"
-requests = "^2.31.0"
-ruff = "^0.1.15"
-sqlalchemy = "^2.0.29"
-twitter-api-client = "^0.10.22"
-
-[tool.poetry.dev-dependencies]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.isort]
 line_length = 119
@@ -28,10 +31,11 @@ multi_line_output = 9
 
 [tool.ruff]
 exclude = [
+    "__pycache__",
+    ".coveragerc",
+    ".git",
     ".venv",
     "venv",
-    "__pycache__",
-    ".git",
 ]
 line-length = 119
 
@@ -45,6 +49,12 @@ preview = true
 preview = true
 quote-style = "double"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/personal_twilog"]

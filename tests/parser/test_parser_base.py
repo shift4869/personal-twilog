@@ -8,8 +8,8 @@ from pathlib import Path
 import orjson
 from mock import MagicMock, patch
 
-from personaltwilog.parser.parser_base import ParserBase
-from personaltwilog.util import find_values
+from personal_twilog.parser.parser_base import ParserBase
+from personal_twilog.util import find_values
 
 
 class ConcreteParser(ParserBase):
@@ -195,7 +195,7 @@ class TestParserBase(unittest.TestCase):
 
     def test_get_media_size(self):
         with ExitStack() as stack:
-            mock_requests = stack.enter_context(patch("personaltwilog.parser.parser_base.requests"))
+            mock_requests = stack.enter_context(patch("personal_twilog.parser.parser_base.requests"))
 
             def return_head(media_url):
                 mock_head_response = MagicMock()

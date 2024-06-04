@@ -3,9 +3,9 @@ import unittest
 
 from sqlalchemy.orm import sessionmaker
 
-from personaltwilog.db.metric_db import MetricDB
-from personaltwilog.db.model import Metric
-from personaltwilog.util import Result
+from personal_twilog.db.metric_db import MetricDB
+from personal_twilog.db.model import Metric
+from personal_twilog.util import Result
 
 
 class TestMetricDB(unittest.TestCase):

@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from personaltwilog.db.model import Likes
+from personal_twilog.db.model import Likes
 
 
 class TestLikes(unittest.TestCase):

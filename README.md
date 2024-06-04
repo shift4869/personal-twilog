@@ -33,7 +33,7 @@
 1. `target` 項目に収集対象のアカウントscreen_nameを設定する
     - `status` はenableで収集対象に含める、disableで収集対象としない
 1. `config/config_example.json` をリネームし、 `config/config.json` として配置
-1. `python personal_twilog.py` で起動
+1. `python ./src/personal_twilog/main.py` で起動
 1. 出力された `timeline.db` をsqliteビュワーで開いて確認
 
 
@@ -43,9 +43,9 @@
 1. ダウンロードの準備が始まるので、1日ほど待つ
 1. ダウンロードの準備が完了した連絡がきたらダウンロードする
 1. ダウンロードしたzipを解凍し、適当な場所に展開しておく
-1. `personaltwilog/load_twitter_archive.py` を開く
+1. `src/personal_twilog/load_twitter_archive.py` を開く
 1. `__main__` 部分にある `input_base_path` に展開した場所のパス、 `output_db_path` にテーブル追加するDBのパスを記載する
-1. `python personaltwilog/load_twitter_archive.py` で起動
+1. `python ./src/personal_twilog/load_twitter_archive.py` で起動
 
 
 ## License/Author

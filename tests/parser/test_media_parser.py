@@ -7,8 +7,8 @@ from pathlib import Path
 import orjson
 from mock import patch
 
-from personaltwilog.parser.media_parser import MediaParser
-from personaltwilog.util import find_values
+from personal_twilog.parser.media_parser import MediaParser
+from personal_twilog.util import find_values
 
 
 class TestMediaParser(unittest.TestCase):
@@ -98,7 +98,7 @@ class TestMediaParser(unittest.TestCase):
 
         with ExitStack() as stack:
             mock_get_media_size = stack.enter_context(
-                patch("personaltwilog.parser.media_parser.MediaParser._get_media_size")
+                patch("personal_twilog.parser.media_parser.MediaParser._get_media_size")
             )
             mock_get_media_size.side_effect = lambda media_url: -1
 

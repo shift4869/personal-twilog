@@ -5,8 +5,8 @@ from typing import Any
 from mock import patch
 from sqlalchemy.pool import StaticPool
 
-from personaltwilog.db.base import Base
-from personaltwilog.util import Result
+from personal_twilog.db.base import Base
+from personal_twilog.util import Result
 
 
 class ConcreteBase(Base):
@@ -22,8 +22,8 @@ class ConcreteBase(Base):
 
 class TestBase(unittest.TestCase):
     def test_init(self):
-        mock_create_engine = self.enterContext(patch("personaltwilog.db.base.create_engine"))
-        mock_create_all = self.enterContext(patch("personaltwilog.db.base.ModelBase.metadata.create_all"))
+        mock_create_engine = self.enterContext(patch("personal_twilog.db.base.create_engine"))
+        mock_create_all = self.enterContext(patch("personal_twilog.db.base.ModelBase.metadata.create_all"))
         mock_create_engine.return_value = "create_engine()"
 
         db_path = "timeline.db"

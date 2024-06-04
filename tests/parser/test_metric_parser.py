@@ -5,8 +5,8 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.metric_parser import MetricParser
-from personaltwilog.util import find_values
+from personal_twilog.parser.metric_parser import MetricParser
+from personal_twilog.util import find_values
 
 
 class TestMetricParser(unittest.TestCase):

@@ -6,17 +6,17 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.db.external_link_db import ExternalLinkDB
-from personaltwilog.db.likes_db import LikesDB
-from personaltwilog.db.media_db import MediaDB
-from personaltwilog.db.metric_db import MetricDB
-from personaltwilog.db.tweet_db import TweetDB
-from personaltwilog.parser.external_link_parser import ExternalLinkParser
-from personaltwilog.parser.likes_parser import LikesParser
-from personaltwilog.parser.media_parser import MediaParser
-from personaltwilog.parser.metric_parser import MetricParser
-from personaltwilog.parser.tweet_parser import TweetParser
-from personaltwilog.webapi.twitter_api import TwitterAPI
+from personal_twilog.db.external_link_db import ExternalLinkDB
+from personal_twilog.db.likes_db import LikesDB
+from personal_twilog.db.media_db import MediaDB
+from personal_twilog.db.metric_db import MetricDB
+from personal_twilog.db.tweet_db import TweetDB
+from personal_twilog.parser.external_link_parser import ExternalLinkParser
+from personal_twilog.parser.likes_parser import LikesParser
+from personal_twilog.parser.media_parser import MediaParser
+from personal_twilog.parser.metric_parser import MetricParser
+from personal_twilog.parser.tweet_parser import TweetParser
+from personal_twilog.webapi.twitter_api import TwitterAPI
 
 logger = getLogger(__name__)
 logger.setLevel(INFO)

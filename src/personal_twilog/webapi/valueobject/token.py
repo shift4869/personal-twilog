@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Self
 
-from personaltwilog.webapi.valueobject.screen_name import ScreenName
+from personal_twilog.webapi.valueobject.screen_name import ScreenName
 
 
 @dataclass(frozen=True)

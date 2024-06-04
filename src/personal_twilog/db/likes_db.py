@@ -1,9 +1,9 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
-from personaltwilog.db.base import Base
-from personaltwilog.db.model import Likes
-from personaltwilog.util import Result
+from personal_twilog.db.base import Base
+from personal_twilog.db.model import Likes
+from personal_twilog.util import Result
 
 
 class LikesDB(Base):

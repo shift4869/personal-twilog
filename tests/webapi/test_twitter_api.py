@@ -7,11 +7,11 @@ from pathlib import Path
 import orjson
 from mock import MagicMock, patch
 
-from personaltwilog.webapi.twitter_api import TwitterAPI
-from personaltwilog.webapi.valueobject.screen_name import ScreenName
-from personaltwilog.webapi.valueobject.token import Token
-from personaltwilog.webapi.valueobject.user_id import UserId
-from personaltwilog.webapi.valueobject.user_name import UserName
+from personal_twilog.webapi.twitter_api import TwitterAPI
+from personal_twilog.webapi.valueobject.screen_name import ScreenName
+from personal_twilog.webapi.valueobject.token import Token
+from personal_twilog.webapi.valueobject.user_id import UserId
+from personal_twilog.webapi.valueobject.user_name import UserName
 
 logger = getLogger("personaltwilog.webapi.twitter_api")
 
@@ -36,7 +36,7 @@ class TestTwitterAPI(unittest.TestCase):
 
     def test_scraper(self):
         with ExitStack() as stack:
-            mock_scraper = stack.enter_context(patch("personaltwilog.webapi.twitter_api.Scraper"))
+            mock_scraper = stack.enter_context(patch("personal_twilog.webapi.twitter_api.Scraper"))
             twitter = self.get_instance()
             mock_scraper.side_effect = lambda cookies, pbar, debug: "scraper_instance"
 
@@ -69,7 +69,7 @@ class TestTwitterAPI(unittest.TestCase):
 
     def test_get_user(self):
         with ExitStack() as stack:
-            mock_scraper = stack.enter_context(patch("personaltwilog.webapi.twitter_api.Scraper"))
+            mock_scraper = stack.enter_context(patch("personal_twilog.webapi.twitter_api.Scraper"))
             twitter = self.get_instance()
             json_dict = self.get_json_dict()
             mock_scraper.return_value.users.side_effect = lambda screen_names: json_dict["data"]["user"]
@@ -90,7 +90,7 @@ class TestTwitterAPI(unittest.TestCase):
 
     def test_get_user_id(self):
         with ExitStack() as stack:
-            mock_get_user = stack.enter_context(patch("personaltwilog.webapi.twitter_api.TwitterAPI._get_user"))
+            mock_get_user = stack.enter_context(patch("personal_twilog.webapi.twitter_api.TwitterAPI._get_user"))
             twitter = self.get_instance()
             json_dict = self.get_json_dict()
             mock_get_user.side_effect = lambda screen_name: json_dict["data"]["user"]
@@ -103,7 +103,7 @@ class TestTwitterAPI(unittest.TestCase):
 
     def test_get_user_name(self):
         with ExitStack() as stack:
-            mock_get_user = stack.enter_context(patch("personaltwilog.webapi.twitter_api.TwitterAPI._get_user"))
+            mock_get_user = stack.enter_context(patch("personal_twilog.webapi.twitter_api.TwitterAPI._get_user"))
             twitter = self.get_instance()
             json_dict = self.get_json_dict()
             mock_get_user.side_effect = lambda screen_name: json_dict["data"]["user"]
@@ -117,8 +117,8 @@ class TestTwitterAPI(unittest.TestCase):
     def test_get_likes(self):
         with ExitStack() as stack:
             mock_logger = stack.enter_context(patch.object(logger, "info"))
-            mock_get_user_id = stack.enter_context(patch("personaltwilog.webapi.twitter_api.TwitterAPI.get_user_id"))
-            mock_scraper = stack.enter_context(patch("personaltwilog.webapi.twitter_api.Scraper"))
+            mock_get_user_id = stack.enter_context(patch("personal_twilog.webapi.twitter_api.TwitterAPI.get_user_id"))
+            mock_scraper = stack.enter_context(patch("personal_twilog.webapi.twitter_api.Scraper"))
 
             json_dict = orjson.loads(Path("./tests/cache/likes_sample.json").read_bytes())
             mock_likes = MagicMock()
@@ -146,8 +146,8 @@ class TestTwitterAPI(unittest.TestCase):
     def test_get_user_timeline(self):
         with ExitStack() as stack:
             mock_logger = stack.enter_context(patch.object(logger, "info"))
-            mock_get_user_id = stack.enter_context(patch("personaltwilog.webapi.twitter_api.TwitterAPI.get_user_id"))
-            mock_scraper = stack.enter_context(patch("personaltwilog.webapi.twitter_api.Scraper"))
+            mock_get_user_id = stack.enter_context(patch("personal_twilog.webapi.twitter_api.TwitterAPI.get_user_id"))
+            mock_scraper = stack.enter_context(patch("personal_twilog.webapi.twitter_api.Scraper"))
 
             json_dict = orjson.loads(Path("./tests/cache/timeline_sample.json").read_bytes())
             mock_timeline = MagicMock()

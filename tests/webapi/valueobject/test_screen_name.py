@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from personaltwilog.webapi.valueobject.screen_name import ScreenName
+from personal_twilog.webapi.valueobject.screen_name import ScreenName
 
 
 class TestScreenName(unittest.TestCase):

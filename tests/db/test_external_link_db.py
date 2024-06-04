@@ -3,9 +3,9 @@ import unittest
 
 from sqlalchemy.orm import sessionmaker
 
-from personaltwilog.db.external_link_db import ExternalLinkDB
-from personaltwilog.db.model import ExternalLink
-from personaltwilog.util import Result
+from personal_twilog.db.external_link_db import ExternalLinkDB
+from personal_twilog.db.model import ExternalLink
+from personal_twilog.util import Result
 
 
 class TestExternalLinkDB(unittest.TestCase):

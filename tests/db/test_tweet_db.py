@@ -3,9 +3,9 @@ import unittest
 
 from sqlalchemy.orm import sessionmaker
 
-from personaltwilog.db.tweet_db import TweetDB
-from personaltwilog.db.model import Tweet
-from personaltwilog.util import Result
+from personal_twilog.db.tweet_db import TweetDB
+from personal_twilog.db.model import Tweet
+from personal_twilog.util import Result
 
 
 class TestTweetDB(unittest.TestCase):

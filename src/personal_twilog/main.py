@@ -1,11 +1,11 @@
 import logging.config
 from logging import INFO, getLogger
 
-from personaltwilog.timeline_crawler import TimelineCrawler
+from personal_twilog.timeline_crawler import TimelineCrawler
 
 logging.config.fileConfig("./log/logging.ini", disable_existing_loggers=False)
 for name in logging.root.manager.loggerDict:
-    if "personaltwilog" not in name:
+    if "personal_twilog" not in name:
         getLogger(name).disabled = True
 logger = getLogger(__name__)
 logger.setLevel(INFO)

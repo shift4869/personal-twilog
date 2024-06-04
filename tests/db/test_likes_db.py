@@ -3,9 +3,9 @@ import unittest
 
 from sqlalchemy.orm import sessionmaker
 
-from personaltwilog.db.likes_db import LikesDB
-from personaltwilog.db.model import Likes
-from personaltwilog.util import Result
+from personal_twilog.db.likes_db import LikesDB
+from personal_twilog.db.model import Likes
+from personal_twilog.util import Result
 
 
 class TestLikesDB(unittest.TestCase):

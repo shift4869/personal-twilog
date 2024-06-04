@@ -5,8 +5,8 @@ from pathlib import Path
 
 import orjson
 
-from personaltwilog.parser.tweet_parser import TweetParser
-from personaltwilog.util import find_values
+from personal_twilog.parser.tweet_parser import TweetParser
+from personal_twilog.util import find_values
 
 
 class TestTweetParser(unittest.TestCase):

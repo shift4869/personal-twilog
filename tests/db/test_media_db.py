@@ -3,9 +3,9 @@ import unittest
 
 from sqlalchemy.orm import sessionmaker
 
-from personaltwilog.db.media_db import MediaDB
-from personaltwilog.db.model import Media
-from personaltwilog.util import Result
+from personal_twilog.db.media_db import MediaDB
+from personal_twilog.db.model import Media
+from personal_twilog.util import Result
 
 
 class TestMediaDB(unittest.TestCase):

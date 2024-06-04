@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from personaltwilog.db.model import ExternalLink
+from personal_twilog.db.model import ExternalLink
 
 
 class TestExternalLink(unittest.TestCase):

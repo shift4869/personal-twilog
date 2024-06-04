@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from personaltwilog.db.model import Media
+from personal_twilog.db.model import Media
 
 
 class TestMedia(unittest.TestCase):

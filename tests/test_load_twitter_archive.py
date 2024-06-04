@@ -6,8 +6,8 @@ from pathlib import Path
 import orjson
 from mock import patch
 
-from personaltwilog.load_twitter_archive import ArchivedTweet, main, table_name
-from personaltwilog.util import Result
+from personal_twilog.load_twitter_archive import ArchivedTweet, main, table_name
+from personal_twilog.util import Result
 
 
 class TestLoadTwitterArchive(unittest.TestCase):
@@ -65,12 +65,12 @@ class TestLoadTwitterArchive(unittest.TestCase):
             self.assertIsInstance(instance, ArchivedTweet)
 
     def test_main(self):
-        mock_create_engine = self.enterContext(patch("personaltwilog.load_twitter_archive.create_engine"))
-        mock_base = self.enterContext(patch("personaltwilog.load_twitter_archive.Base"))
-        mock_session = self.enterContext(patch("personaltwilog.load_twitter_archive.sessionmaker"))
-        mock_glob = self.enterContext(patch("personaltwilog.load_twitter_archive.Path.glob"))
-        mock_tqdm = self.enterContext(patch("personaltwilog.load_twitter_archive.tqdm"))
-        mock_print = self.enterContext(patch("personaltwilog.load_twitter_archive.print"))
+        mock_create_engine = self.enterContext(patch("personal_twilog.load_twitter_archive.create_engine"))
+        mock_base = self.enterContext(patch("personal_twilog.load_twitter_archive.Base"))
+        mock_session = self.enterContext(patch("personal_twilog.load_twitter_archive.sessionmaker"))
+        mock_glob = self.enterContext(patch("personal_twilog.load_twitter_archive.Path.glob"))
+        mock_tqdm = self.enterContext(patch("personal_twilog.load_twitter_archive.tqdm"))
+        mock_print = self.enterContext(patch("personal_twilog.load_twitter_archive.print"))
 
         mock_tqdm.side_effect = lambda any_list, desc: any_list
 

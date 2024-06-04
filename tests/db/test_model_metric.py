@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from personaltwilog.db.model import Metric
+from personal_twilog.db.model import Metric
 
 
 class TestMetric(unittest.TestCase):

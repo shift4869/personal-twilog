@@ -8,7 +8,7 @@ from sqlalchemy import Column, Integer, String, create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from tqdm import tqdm
 
-from personaltwilog.util import Result, find_values
+from personal_twilog.util import Result, find_values
 
 Base = declarative_base()
 date_str = datetime.now().strftime("%Y%m%d")
@@ -187,5 +187,5 @@ def main(input_base_path: Path, output_db_path: Path) -> Result:
 
 if __name__ == "__main__":
     input_base_path = Path("I:/Users/shift/Documents/twitter_backup/twitter-2023-09-22")
-    output_db_path = Path("D:/Users/shift/Documents/git/PersonalTwilog/timeline.db")
+    output_db_path = Path("D:/Users/shift/Documents/git/personal-twilog/timeline.db")
     main(input_base_path, output_db_path)
