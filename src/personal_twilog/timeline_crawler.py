@@ -37,15 +37,8 @@ class TimelineCrawler:
         CONFIG_FILE_NAME = "./config/config.json"
         config = orjson.loads(Path(CONFIG_FILE_NAME).read_bytes())
 
-        config = config["twitter_api_client_list"][0]  # TODO::authorize複数対応
-        self.config = config
-        authorize_screen_name = config["authorize"]["screen_name"]
-        ct0 = config["authorize"]["ct0"]
-        auth_token = config["authorize"]["auth_token"]
-        if not DEBUG:
-            self.twitter = TwitterAPI(authorize_screen_name, ct0, auth_token)
-        else:
-            self.twitter = None
+        self.config = config["twitter_api_client_list"]
+
         self.tweet_db = TweetDB()
         self.likes_db = LikesDB()
         self.media_db = MediaDB()
@@ -174,21 +167,29 @@ class TimelineCrawler:
 
     def run(self) -> None:
         logger.info("TimelineCrawler run -> start")
-        authorize_screen_name = self.twitter.authorize_screen_name.name
-        logger.info(f"Authorize screen_name is '{authorize_screen_name}'.")
-        target_dicts = self.config["target"]  # TODO::authorize複数対応
+        # authorize_screen_name = self.twitter.authorize_screen_name.name
+        # logger.info(f"Authorize screen_name is '{authorize_screen_name}'.")
+        target_dicts = self.config
         for target_dict in target_dicts:
-            target_screen_name = target_dict["screen_name"]
             is_enable = "enable" == target_dict["status"]
+            screen_name = target_dict["screen_name"]
 
             if not is_enable:
-                logger.info(f"Status is not enable , target screen_name = '{target_screen_name}' -> skip")
+                logger.info(f"Status is not enable , target screen_name = '{screen_name}' -> skip")
                 continue
 
+            ct0 = target_dict["ct0"]
+            auth_token = target_dict["auth_token"]
+
+            if not DEBUG:
+                self.twitter = TwitterAPI(screen_name, ct0, auth_token)
+            else:
+                self.twitter = None
+
             logger.info("----------")
-            self.timeline_crawl(target_screen_name)
+            self.timeline_crawl(screen_name)
             logger.info("-----")
-            self.likes_crawl(target_screen_name)
+            self.likes_crawl(screen_name)
             logger.info("----------")
         logger.info("TimelineCrawler run -> done")
 
