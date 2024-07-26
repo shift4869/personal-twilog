@@ -16,6 +16,7 @@ from personal_twilog.parser.likes_parser import LikesParser
 from personal_twilog.parser.media_parser import MediaParser
 from personal_twilog.parser.metric_parser import MetricParser
 from personal_twilog.parser.tweet_parser import TweetParser
+from personal_twilog.stats.timeline_stats import TimelineStats
 from personal_twilog.webapi.twitter_api import TwitterAPI
 
 logger = getLogger(__name__)
@@ -100,8 +101,9 @@ class TimelineCrawler:
 
         # Metric
         logger.info("Metric table update -> start")
-        metric_dict_list = MetricParser(tweet_list, self.registered_at, screen_name).parse()
-        self.metric_db.upsert(metric_dict_list)
+        metric_parsed_dict = MetricParser(tweet_list, self.registered_at, screen_name).parse()
+        metric_dict = TimelineStats(metric_parsed_dict[0], self.tweet_db).to_dict()
+        self.metric_db.upsert([metric_dict])
         logger.info("Metric table update -> done")
 
         logger.info("TimelineCrawler timeline_crawl -> done")

@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Self
 
-from sqlalchemy import Boolean, Column, Integer, String, create_engine
+from sqlalchemy import Boolean, Column, Integer, Numeric, String, create_engine
 from sqlalchemy.orm import Session, declarative_base
 
 Base = declarative_base()
@@ -569,6 +569,25 @@ class Metric(Base):
     media_count = Column(Integer, nullable=False)
     following_count = Column(Integer, nullable=False)
     followers_count = Column(Integer, nullable=False)
+    min_appeared_at = Column(String(256), nullable=False)
+    max_appeared_at = Column(String(256), nullable=False)
+    duration_days = Column(Integer, nullable=False)
+    count_all = Column(Integer, nullable=False)
+    appeared_days = Column(Integer, nullable=False)
+    non_appeared_days = Column(Integer, nullable=False)
+    average_tweet_by_day = Column(Numeric, nullable=False)
+    max_tweet_num_by_day = Column(Integer, nullable=False)
+    max_tweet_day_by_day = Column(String(256), nullable=False)
+    tweet_length_sum = Column(Integer, nullable=False)
+    tweet_length_by_count = Column(Numeric, nullable=False)
+    tweet_length_by_day = Column(Numeric, nullable=False)
+    communication_ratio = Column(Numeric, nullable=False)
+    increase_following_by_day = Column(Numeric, nullable=False)
+    increase_followers_by_day = Column(Numeric, nullable=False)
+    ff_ratio = Column(Numeric, nullable=False)
+    ff_ratio_inverse = Column(Numeric, nullable=False)
+    available_following = Column(Integer, nullable=False)
+    rest_available_following = Column(Integer, nullable=False)
     registered_at = Column(String(256), nullable=False)
 
     def __init__(
@@ -579,6 +598,25 @@ class Metric(Base):
         media_count: int,
         following_count: int,
         followers_count: int,
+        min_appeared_at: str,
+        max_appeared_at: str,
+        duration_days: int,
+        count_all: int,
+        appeared_days: int,
+        non_appeared_days: int,
+        average_tweet_by_day: float,
+        max_tweet_num_by_day: int,
+        max_tweet_day_by_day: str,
+        tweet_length_sum: int,
+        tweet_length_by_count: float,
+        tweet_length_by_day: float,
+        communication_ratio: float,
+        increase_following_by_day: float,
+        increase_followers_by_day: float,
+        ff_ratio: float,
+        ff_ratio_inverse: float,
+        available_following: int,
+        rest_available_following: int,
         registered_at: str,
     ):
         # self.id = id
@@ -588,6 +626,25 @@ class Metric(Base):
         self.media_count = media_count
         self.following_count = following_count
         self.followers_count = followers_count
+        self.min_appeared_at = min_appeared_at
+        self.max_appeared_at = max_appeared_at
+        self.duration_days = duration_days
+        self.count_all = count_all
+        self.appeared_days = appeared_days
+        self.non_appeared_days = non_appeared_days
+        self.average_tweet_by_day = average_tweet_by_day
+        self.max_tweet_num_by_day = max_tweet_num_by_day
+        self.max_tweet_day_by_day = max_tweet_day_by_day
+        self.tweet_length_sum = tweet_length_sum
+        self.tweet_length_by_count = tweet_length_by_count
+        self.tweet_length_by_day = tweet_length_by_day
+        self.communication_ratio = communication_ratio
+        self.increase_following_by_day = increase_following_by_day
+        self.increase_followers_by_day = increase_followers_by_day
+        self.ff_ratio = ff_ratio
+        self.ff_ratio_inverse = ff_ratio_inverse
+        self.available_following = available_following
+        self.rest_available_following = rest_available_following
         self.registered_at = registered_at
 
     @classmethod
@@ -600,6 +657,25 @@ class Metric(Base):
                 "media_count": media_count,
                 "following_count": following_count,
                 "followers_count": followers_count,
+                "min_appeared_at": min_appeared_at,
+                "max_appeared_at": max_appeared_at,
+                "duration_days": duration_days,
+                "count_all": count_all,
+                "appeared_days": appeared_days,
+                "non_appeared_days": non_appeared_days,
+                "average_tweet_by_day": average_tweet_by_day,
+                "max_tweet_num_by_day": max_tweet_num_by_day,
+                "max_tweet_day_by_day": max_tweet_day_by_day,
+                "tweet_length_sum": tweet_length_sum,
+                "tweet_length_by_count": tweet_length_by_count,
+                "tweet_length_by_day": tweet_length_by_day,
+                "communication_ratio": communication_ratio,
+                "increase_following_by_day": increase_following_by_day,
+                "increase_followers_by_day": increase_followers_by_day,
+                "ff_ratio": ff_ratio,
+                "ff_ratio_inverse": ff_ratio_inverse,
+                "available_following": available_following,
+                "rest_available_following": rest_available_following,
                 "registered_at": registered_at,
             }:
                 return Metric(
@@ -609,16 +685,39 @@ class Metric(Base):
                     media_count,
                     following_count,
                     followers_count,
+                    min_appeared_at,
+                    max_appeared_at,
+                    duration_days,
+                    count_all,
+                    appeared_days,
+                    non_appeared_days,
+                    average_tweet_by_day,
+                    max_tweet_num_by_day,
+                    max_tweet_day_by_day,
+                    tweet_length_sum,
+                    tweet_length_by_count,
+                    tweet_length_by_day,
+                    communication_ratio,
+                    increase_following_by_day,
+                    increase_followers_by_day,
+                    ff_ratio,
+                    ff_ratio_inverse,
+                    available_following,
+                    rest_available_following,
                     registered_at,
                 )
             case _:
                 raise ValueError("Unmatch args_dict.")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Metric(registered_at='{self.registered_at}')>"
 
-    def __eq__(self, other):
-        return isinstance(other, Metric) and other.registered_at == self.registered_at
+    def __eq__(self, other) -> bool:
+        return (
+            isinstance(other, Metric)
+            and other.screen_name == self.screen_name
+            and other.registered_at == self.registered_at
+        )
 
     def to_dict(self) -> dict:
         return {
@@ -628,6 +727,25 @@ class Metric(Base):
             "media_count": self.media_count,
             "following_count": self.following_count,
             "followers_count": self.followers_count,
+            "min_appeared_at": self.min_appeared_at,
+            "max_appeared_at": self.max_appeared_at,
+            "duration_days": self.duration_days,
+            "count_all": self.count_all,
+            "appeared_days": self.appeared_days,
+            "non_appeared_days": self.non_appeared_days,
+            "average_tweet_by_day": self.average_tweet_by_day,
+            "max_tweet_num_by_day": self.max_tweet_num_by_day,
+            "max_tweet_day_by_day": self.max_tweet_day_by_day,
+            "tweet_length_sum": self.tweet_length_sum,
+            "tweet_length_by_count": self.tweet_length_by_count,
+            "tweet_length_by_day": self.tweet_length_by_day,
+            "communication_ratio": self.communication_ratio,
+            "increase_following_by_day": self.increase_following_by_day,
+            "increase_followers_by_day": self.increase_followers_by_day,
+            "ff_ratio": self.ff_ratio,
+            "ff_ratio_inverse": self.ff_ratio_inverse,
+            "available_following": self.available_following,
+            "rest_available_following": self.rest_available_following,
             "registered_at": self.registered_at,
         }
 
