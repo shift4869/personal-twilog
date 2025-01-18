@@ -1,9 +1,14 @@
+import os
+import shutil
 import sys
 import unittest
 from collections import namedtuple
+from datetime import datetime
 from logging import getLogger
+from pathlib import Path
 
 import freezegun
+from dateutil.relativedelta import relativedelta
 from mock import MagicMock, call, patch
 
 from personal_twilog.timeline_crawler import CrawlResultStatus, TimelineCrawler
@@ -29,7 +34,6 @@ class TestTimelineCrawler(unittest.TestCase):
 
     def _get_instance(self) -> TimelineCrawler:
         mock_logger = self.enterContext(patch.object(logger, "info"))
-        mock_path = self.enterContext(patch("personal_twilog.timeline_crawler.Path"))
         mock_orjson = self.enterContext(patch("personal_twilog.timeline_crawler.orjson"))
         mock_tweet_db = self.enterContext(patch("personal_twilog.timeline_crawler.TweetDB"))
         mock_likes_db = self.enterContext(patch("personal_twilog.timeline_crawler.LikesDB"))
@@ -91,6 +95,7 @@ class TestTimelineCrawler(unittest.TestCase):
         min_id = 100
         mock_tweet_db.select_for_max_id.side_effect = lambda screen_name: min_id
 
+        mock_path = self.enterContext(patch("personal_twilog.timeline_crawler.Path"))
         mock_tweet_parser = self.enterContext(patch("personal_twilog.timeline_crawler.TweetParser"))
         mock_media_parser = self.enterContext(patch("personal_twilog.timeline_crawler.MediaParser"))
         mock_external_link_parser = self.enterContext(patch("personal_twilog.timeline_crawler.ExternalLinkParser"))
@@ -230,6 +235,7 @@ class TestTimelineCrawler(unittest.TestCase):
         min_id = 100
         mock_likes_db.select_for_max_id.side_effect = lambda screen_name: min_id
 
+        mock_path = self.enterContext(patch("personal_twilog.timeline_crawler.Path"))
         mock_likes_parser = self.enterContext(patch("personal_twilog.timeline_crawler.LikesParser"))
         mock_media_parser = self.enterContext(patch("personal_twilog.timeline_crawler.MediaParser"))
         mock_external_link_parser = self.enterContext(patch("personal_twilog.timeline_crawler.ExternalLinkParser"))
@@ -346,6 +352,67 @@ class TestTimelineCrawler(unittest.TestCase):
             actual = crawler.likes_crawl(screen_name)
             post_run(params, actual)
 
+    def test_clean_cache(self):
+        mock_logger = self.enterContext(patch.object(logger, "info"))
+        self.enterContext(freezegun.freeze_time("2025-01-18T01:00:00"))
+
+        crawler = self._get_instance()
+        base_path: Path = Path("./tests/data")
+
+        Params = namedtuple("Params", ["file_num", "dir_num", "file_num_in_dir", "is_cutoff", "cutoff_days"])
+
+        def pre_run(params: Params):
+            base_path.mkdir(exist_ok=True, parents=True)
+            dir_list: list[Path] = []
+            for i in range(params.file_num):
+                file_path = base_path / f"dummy_file{i}.zip"
+                file_path.touch()
+                if params.is_cutoff:
+                    now_date = datetime.now()
+                    cutoff_date = now_date - relativedelta(days=params.cutoff_days + 1)
+                    utime = cutoff_date.timestamp()
+                    os.utime(file_path, (utime, utime))
+            for i in range(params.dir_num):
+                dir_path = base_path / f"dir_num{i}"
+                dir_path.mkdir(exist_ok=True, parents=True)
+                dir_list.append(dir_path)
+            for dir_path in dir_list:
+                if params.file_num_in_dir > 0:
+                    for i in range(params.file_num_in_dir):
+                        (dir_path / f"dummy_file_in_dir{i}.json").touch()
+                else:
+                    (dir_path / f"dummy_dir").mkdir()
+
+        def post_run(params: Params, actual):
+            self.assertIsNone(actual)
+            dir_list = [folder_path for folder_path in base_path.iterdir() if folder_path.is_dir()]
+            self.assertEqual([], dir_list)
+
+            for i in range(params.file_num):
+                file_path = base_path / f"dummy_file{i}.zip"
+                if not params.is_cutoff:
+                    self.assertTrue(file_path.is_file())
+                else:
+                    self.assertFalse(file_path.exists())
+
+            now_date = datetime.now()
+            now_date_str = now_date.strftime("%Y%m%d")
+            zipfile_path = base_path / f"cache_{now_date_str}.zip"
+            self.assertTrue(zipfile_path.is_file())
+            shutil.rmtree(base_path)
+
+        params_list = [
+            Params(1, 4, 5, False, 7),
+            Params(7, 4, 5, False, 7),
+            Params(1, 4, 5, True, 7),
+            Params(7, 4, 5, True, 7),
+            Params(1, 4, 0, True, 7),
+        ]
+        for params in params_list:
+            pre_run(params)
+            actual = crawler.clean_cache(base_path, params.cutoff_days)
+            post_run(params, actual)
+
     def test_run(self):
         mock_logger = self.enterContext(patch.object(logger, "info"))
         mock_debug = self.enterContext(patch("personal_twilog.timeline_crawler.DEBUG"))
@@ -354,6 +421,7 @@ class TestTimelineCrawler(unittest.TestCase):
             patch("personal_twilog.timeline_crawler.TimelineCrawler.timeline_crawl")
         )
         mock_likes_crawl = self.enterContext(patch("personal_twilog.timeline_crawler.TimelineCrawler.likes_crawl"))
+        mock_clean_cache = self.enterContext(patch("personal_twilog.timeline_crawler.TimelineCrawler.clean_cache"))
         crawler = self._get_instance()
 
         Params = namedtuple("Params", ["is_debug", "enable_num", "disable_num"])
@@ -365,6 +433,7 @@ class TestTimelineCrawler(unittest.TestCase):
             mock_twitter_api.reset_mock()
             mock_timeline_crawl.reset_mock()
             mock_likes_crawl.reset_mock()
+            mock_clean_cache.reset_mock()
 
             config = self._get_config_json(params.enable_num, params.disable_num)
             crawler.config = config["twitter_api_client_list"]
@@ -390,6 +459,7 @@ class TestTimelineCrawler(unittest.TestCase):
             self.assertEqual(twitter_api_calls, mock_twitter_api.mock_calls)
             self.assertEqual(timeline_crawl_calls, mock_timeline_crawl.mock_calls)
             self.assertEqual(likes_crawl_calls, mock_likes_crawl.mock_calls)
+            mock_clean_cache.assert_called_once()
 
         params_list = [
             Params(False, 1, 0),

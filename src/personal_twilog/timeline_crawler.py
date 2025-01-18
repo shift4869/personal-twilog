@@ -1,10 +1,13 @@
 import logging.config
+import shutil
+import zipfile
 from datetime import datetime
 from enum import Enum, auto
 from logging import INFO, getLogger
 from pathlib import Path
 
 import orjson
+from dateutil.relativedelta import relativedelta
 
 from personal_twilog.db.external_link_db import ExternalLinkDB
 from personal_twilog.db.likes_db import LikesDB
@@ -171,6 +174,52 @@ class TimelineCrawler:
         logger.info("TimelineCrawler likes_crawl -> done")
         return CrawlResultStatus.DONE
 
+    def clean_cache(self, base_path: Path, cutoff_days: int = 7) -> None:
+        """
+        指定したパス内のファイルをcutoff_days以内のものだけ残し
+        cutoff_daysより古いファイルを削除する
+        今回分のログはzip圧縮する
+
+        base_path (Path): 対象フォルダパス
+        cutoff_days (int, optional): 削除対象となる期限
+        """
+        logger.info("TimelineCrawler clean_cache -> start")
+        logger.info("Cutoff cache -> start")
+        delete_num = 0
+        now_date = datetime.now()
+        cutoff_date = now_date - relativedelta(days=cutoff_days)
+        logger.info(f"cutoff_date is {cutoff_date.isoformat()}.")
+        for file in base_path.iterdir():
+            if not file.is_file():
+                continue
+            file_mtime = file.stat().st_mtime
+            if datetime.fromtimestamp(file_mtime) < cutoff_date:
+                file.unlink(missing_ok=True)
+                delete_num += 1
+        logger.info("Cutoff cache -> done")
+
+        logger.info("Archive cache -> start")
+        now_date_str = now_date.strftime("%Y%m%d")
+        zipfile_path = base_path / f"cache_{now_date_str}.zip"
+        with zipfile.ZipFile(zipfile_path, "a", compression=zipfile.ZIP_LZMA, compresslevel=-1) as zf:
+            for folder_path in base_path.iterdir():
+                if not folder_path.is_dir():
+                    continue
+                for file in folder_path.iterdir():
+                    if not file.is_file():
+                        continue
+                    # アーカイブ時にルートは除外
+                    path_parts: Path = file.parts
+                    arcname: Path = Path(*path_parts[1:])
+                    zf.write(file, arcname)
+                    file.unlink(missing_ok=True)
+                shutil.rmtree(folder_path)
+                file.unlink(missing_ok=True)
+        logger.info(f"Archived {zipfile_path.name}.")
+        logger.info("Archive cache -> done")
+
+        logger.info("TimelineCrawler clean_cache -> done")
+
     def run(self) -> None:
         logger.info("TimelineCrawler run -> start")
         target_dicts = self.config
@@ -195,6 +244,9 @@ class TimelineCrawler:
             logger.info("-----")
             self.likes_crawl(screen_name)
             logger.info("----------")
+
+        # キャッシュファイルをアーカイブして古いものを削除する
+        self.clean_cache(Path("./data"))
         logger.info("TimelineCrawler run -> done")
 
 
