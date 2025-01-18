@@ -50,6 +50,6 @@
 
 ## License/Author
 [MIT License](https://github.com/shift4869/personal-twilog/blob/master/LICENSE)  
-Copyright (c) 2021 - 2024 [shift](https://twitter.com/_shift4869)  
+Copyright (c) 2021 - 2025 [shift](https://twitter.com/_shift4869)  
 
 
