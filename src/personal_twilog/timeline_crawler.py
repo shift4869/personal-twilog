@@ -102,8 +102,13 @@ class TimelineCrawler:
         # Metric
         logger.info("Metric table update -> start")
         metric_parsed_dict = MetricParser(tweet_list, self.registered_at, screen_name).parse()
-        metric_dict = TimelineStats(metric_parsed_dict[0], self.tweet_db).to_dict()
-        self.metric_db.upsert([metric_dict])
+        if not metric_parsed_dict:
+            # 新規追加が1件のみ、かつRT等で、
+            # 自分が投稿したレコードが無く、Metricが取得出来なかった場合スキップ
+            logger.info("Valid Metric record is nothing, maybe no own record -> skip")
+        else:
+            metric_dict = TimelineStats(metric_parsed_dict[0], self.tweet_db).to_dict()
+            self.metric_db.upsert([metric_dict])
         logger.info("Metric table update -> done")
 
         logger.info("TimelineCrawler timeline_crawl -> done")
@@ -142,11 +147,10 @@ class TimelineCrawler:
 
         # Likes
         logger.info("Likes table update -> start")
-        user_id = self.twitter.get_user_id(screen_name)
-        user_name = self.twitter.get_user_name(screen_name)
-        tweet_dict_list = LikesParser(
-            tweet_list, self.registered_at, user_id.id_str, user_name.name, screen_name
-        ).parse()
+        tweet_dict_list = []
+        user_id = self.twitter.get_user_id(screen_name).id_str if self.twitter else ""
+        user_name = self.twitter.get_user_name(screen_name).name if self.twitter else ""
+        tweet_dict_list = LikesParser(tweet_list, self.registered_at, user_id, user_name, screen_name).parse()
         self.likes_db.upsert(tweet_dict_list)
         logger.info("Likes table update -> done")
 
@@ -169,8 +173,6 @@ class TimelineCrawler:
 
     def run(self) -> None:
         logger.info("TimelineCrawler run -> start")
-        # authorize_screen_name = self.twitter.authorize_screen_name.name
-        # logger.info(f"Authorize screen_name is '{authorize_screen_name}'.")
         target_dicts = self.config
         for target_dict in target_dicts:
             is_enable = "enable" == target_dict["status"]

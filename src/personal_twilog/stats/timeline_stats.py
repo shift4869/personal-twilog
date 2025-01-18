@@ -21,6 +21,9 @@ class TimelineStats:
                 pass
             case _:
                 raise ValueError("Unmatch metric_parsed_dict.")
+        if not isinstance(tweet_db, TweetDB):
+            raise ValueError("tweet_db must be TweetDB.")
+
         self.metric_parsed_dict = metric_parsed_dict
         self.tweet_db = tweet_db
         self.registered_at = metric_parsed_dict["registered_at"]

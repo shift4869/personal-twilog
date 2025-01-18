@@ -17,6 +17,25 @@ class TestMetricDB(unittest.TestCase):
             "media_count": index,
             "following_count": index,
             "followers_count": index,
+            "min_appeared_at": "2023-04-02T22:34:46",
+            "max_appeared_at": "2025-01-17T21:06:56",
+            "duration_days": index,
+            "count_all": index,
+            "appeared_days": index,
+            "non_appeared_days": index,
+            "average_tweet_by_day": 1.0,
+            "max_tweet_num_by_day": index,
+            "max_tweet_day_by_day": "2024-12-06",
+            "tweet_length_sum": index,
+            "tweet_length_by_count": 1.0,
+            "tweet_length_by_day": 1.0,
+            "communication_ratio": 1.0,
+            "increase_following_by_day": 0.1,
+            "increase_followers_by_day": 0.1,
+            "ff_ratio": 0.1,
+            "ff_ratio_inverse": 1.0,
+            "available_following": index,
+            "rest_available_following": index,
             "registered_at": f"registered_at_{index}",
         }
         return args_dict
@@ -64,17 +83,17 @@ class TestMetricDB(unittest.TestCase):
         record["status_count"] = record["status_count"] + 1
 
         actual = instance.upsert([record])
-        actual = instance.select()[0].to_dict()
-        expect = record
         self.assertEqual(Result.success, actual)
+        actual = instance.select()[0]
+        expect = Metric.create(record)
         self.assertEqual(expect, actual)
 
         # insert
         record = self._make_record_dict(5)
         actual = instance.upsert([record])
-        actual = instance.select()[5].to_dict()
-        expect = self._make_record_dict(5)
         self.assertEqual(Result.success, actual)
+        actual = instance.select()[5]
+        expect = Metric.create(self._make_record_dict(5))
         self.assertEqual(expect, actual)
 
         # 引数に辞書でないものが存在する

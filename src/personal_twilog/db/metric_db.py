@@ -62,6 +62,25 @@ class MetricDB(Base):
                 p.media_count = r.media_count
                 p.following_count = r.following_count
                 p.followers_count = r.followers_count
+                p.min_appeared_at = r.min_appeared_at
+                p.max_appeared_at = r.max_appeared_at
+                p.duration_days = r.duration_days
+                p.count_all = r.count_all
+                p.appeared_days = r.appeared_days
+                p.non_appeared_days = r.non_appeared_days
+                p.average_tweet_by_day = r.average_tweet_by_day
+                p.max_tweet_num_by_day = r.max_tweet_num_by_day
+                p.max_tweet_day_by_day = r.max_tweet_day_by_day
+                p.tweet_length_sum = r.tweet_length_sum
+                p.tweet_length_by_count = r.tweet_length_by_count
+                p.tweet_length_by_day = r.tweet_length_by_day
+                p.communication_ratio = r.communication_ratio
+                p.increase_following_by_day = r.increase_following_by_day
+                p.increase_followers_by_day = r.increase_followers_by_day
+                p.ff_ratio = r.ff_ratio
+                p.ff_ratio_inverse = r.ff_ratio_inverse
+                p.available_following = r.available_following
+                p.rest_available_following = r.rest_available_following
                 # p.registered_at = r.registered_at
 
         session.commit()
