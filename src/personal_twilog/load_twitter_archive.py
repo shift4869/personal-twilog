@@ -182,7 +182,7 @@ def main(input_base_path: Path, output_db_path: Path) -> Result:
     session.commit()
     session.close()
     print("DB commit done.")
-    return Result.SUCCESS
+    return Result.success
 
 
 if __name__ == "__main__":

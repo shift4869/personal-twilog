@@ -3,8 +3,8 @@ from typing import Any
 
 
 class Result(Enum):
-    SUCCESS = auto()
-    FAILED = auto()
+    success = auto()
+    failed = auto()
 
 
 def find_values(

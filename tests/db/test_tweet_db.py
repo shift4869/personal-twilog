@@ -3,8 +3,8 @@ import unittest
 
 from sqlalchemy.orm import sessionmaker
 
-from personal_twilog.db.tweet_db import TweetDB
 from personal_twilog.db.model import Tweet
+from personal_twilog.db.tweet_db import TweetDB
 from personal_twilog.util import Result
 
 
@@ -99,7 +99,7 @@ class TestTweetDB(unittest.TestCase):
         record["tweet_text"] = "new_tweet_text"
 
         actual = instance.upsert([record])
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = instance.select()[0].to_dict()
         expect = record
         self.assertEqual(expect, actual)
@@ -107,7 +107,7 @@ class TestTweetDB(unittest.TestCase):
         # insert
         record = self._make_record_dict(5)
         actual = instance.upsert([record])
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
         actual = instance.select()[5].to_dict()
         expect = self._make_record_dict(5)
         self.assertEqual(expect, actual)
@@ -115,15 +115,15 @@ class TestTweetDB(unittest.TestCase):
         # 引数に辞書でないものが存在する
         record = self._make_record_dict(0)
         actual = instance.upsert([record, "invalid"])
-        self.assertEqual(Result.FAILED, actual)
+        self.assertEqual(Result.failed, actual)
 
         # 空リスト指定 -> 0レコードのupsert完了とみなして正常終了扱い
         actual = instance.upsert([])
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
 
         # 引数がリストでない
         actual = instance.upsert("invalid")
-        self.assertEqual(Result.FAILED, actual)
+        self.assertEqual(Result.failed, actual)
 
 
 if __name__ == "__main__":

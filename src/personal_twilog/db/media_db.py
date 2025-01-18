@@ -25,17 +25,17 @@ class MediaDB(Base):
             record (list[dict]): レコード辞書のリスト
 
         Returns:
-            Result: upsert に成功したなら Result.SUCCESS, そうでないなら Result.FAILED
+            Result: upsert に成功したなら Result.success, そうでないなら Result.failed
         """
         if not isinstance(record, list):
-            return Result.FAILED
+            return Result.failed
         if record == []:
             # 空リストは0レコードupsert完了とみなして正常終了扱い
-            return Result.SUCCESS
+            return Result.success
 
         all_dict_flag = all([isinstance(r, dict) for r in record])
         if not all_dict_flag:
-            return Result.FAILED
+            return Result.failed
 
         record_list: list[Media] = [Media.create(r) for r in record]
 
@@ -71,4 +71,4 @@ class MediaDB(Base):
 
         session.commit()
         session.close()
-        return Result.SUCCESS
+        return Result.success

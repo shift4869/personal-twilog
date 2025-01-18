@@ -17,7 +17,7 @@ class ConcreteBase(Base):
         return ["select()"]
 
     def upsert(self, record: list[dict]) -> list[Result]:
-        return [Result.SUCCESS]
+        return [Result.success]
 
 
 class TestBase(unittest.TestCase):
@@ -44,7 +44,7 @@ class TestBase(unittest.TestCase):
         mock_create_all.assert_called_once_with("create_engine()")
 
         self.assertEqual(["select()"], instance.select())
-        self.assertEqual([Result.SUCCESS], instance.upsert([]))
+        self.assertEqual([Result.success], instance.upsert([]))
 
 
 if __name__ == "__main__":

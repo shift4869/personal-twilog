@@ -86,7 +86,7 @@ class TestLoadTwitterArchive(unittest.TestCase):
         (input_js_path.parent / input_json_file).rename(input_js_path)
 
         actual = main(input_base_path, output_db_path)
-        self.assertEqual(Result.SUCCESS, actual)
+        self.assertEqual(Result.success, actual)
 
         shutil.rmtree(input_js_path.parent)
         pass
