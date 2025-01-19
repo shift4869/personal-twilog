@@ -1,0 +1,67 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package
+
+on:
+  workflow_dispatch:
+    inputs:
+      loglevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+  push:
+    branches: [ master, develop, feature/ci ]
+  schedule:
+    # min hour(UTC) day month week[0(sun)-6(sat)]
+    # */1 17:00 , run
+    - cron:  "0 8 1,15 * *"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ./requirements.lock
+
+    - name: Set config.json
+      run: |
+        copy ./github/workflows/config_ci.json ./config/config.json
+
+    - name: Test with unittest
+      run: |
+        python -m unittest
+      working-directory: ./
+
+    - name: Coverage report
+      run: |
+        python -m coverage run --source=. --rcfile=./.github/.coveragerc -m unittest discover
+        python -m coverage report --rcfile=./.github/.coveragerc --format=total --precision=2
+        echo coverage=$(python -m coverage report --rcfile=./.github/.coveragerc --format=total --precision=2) >> $env:GITHUB_ENV
+      working-directory: ./
+
+    - name: Create Coverage Badge
+      uses: schneegans/dynamic-badges-action@v1.7.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: ad61760f15c4a67a5c421cf479e3c7e7
+        filename: 05_personal-twilog.json
+        label: Coverage
+        message: ${{ env.coverage }}%
+        valColorRange: ${{ env.coverage }}
+        maxColorRange: 80
+        minColorRange: 30

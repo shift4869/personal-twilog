@@ -1,6 +1,6 @@
 # personal-twilog
 
-<!--![Coverage reports](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/shift4869/ad61760f15c4a67a5c421cf479e3c7e7/raw/02_NNMM.json)-->
+![Coverage reports](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/shift4869/ad61760f15c4a67a5c421cf479e3c7e7/raw/05_personal-twilog.json)
 
 ## 概要
 個人用ツイログ  

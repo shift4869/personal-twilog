@@ -1,4 +1,5 @@
 {
+    "comment": "# CI用のconfigファイル 現状は秘匿情報無しなのでこのままアップロードOK",
     "twitter_api_client_list": [
         {
             "status": "enable",
