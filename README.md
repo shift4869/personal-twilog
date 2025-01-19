@@ -4,34 +4,36 @@
 
 ## 概要
 個人用ツイログ  
-特定のアカウントのツイート等を記録する
-
+自分のアカウントのツイート等を記録する  
 
 ## 特徴（できること）
 - 機能
-    - 特定のアカウントのツイートをDBに記録
-    - 特定のアカウントのいいね（Likes）をDBに記録
-    - 特定のアカウントのTL上に現れたメディア情報をDBに記録
-    - 特定のアカウントのTL上に現れた外部リンク情報をDBに記録
-    - 特定のアカウントの統計情報（ツイート数、FF数など）をDBに記録
+    - ツイートをDBに記録
+    - いいね（Likes）をDBに記録
+    - TL上に現れたメディア情報をDBに記録
+    - TL上に現れた外部リンク情報をDBに記録
+    - 統計情報（ツイート数、FF数など）をDBに記録
+    - 自分がログインできるならば複数アカウントを記録対象として設定可能
     - ツイッター公式のフルアーカイブjsを取り込み、テーブルとしてDBに保存する機能
 
 
 ## 前提として必要なもの
-- Pythonの実行環境(3.11以上)
+- ツイッターアカウント
+- Pythonの実行環境(3.12以上)
 
 
 ## 使い方
-1. `config/config_example.json` を開き、 `authorize` 項目を設定する
+1. `config/config_example.json` を開き、 `twitter_api_client_list` 項目を設定する
     - ブラウザでログイン済のアカウントについて、以下の値をクッキーから取得
-        - ct0 (クッキー中)
-        - auth_token (クッキー中)
-        - screen_name(上記ct0, auth_tokenに紐づく@マーク抜きのscreen_name)
+        - `ct0` (クッキー中)
+        - `auth_token` (クッキー中)
+        - `screen_name` (上記 `ct0` , `auth_token` に紐づく@マーク無しの `screen_name` )
     - ブラウザ上でのクッキーの確認方法
         - 各ブラウザによって異なるが、概ね `F12を押す→ページ更新→アプリケーションタブ→クッキー` で確認可能
     - 詳しくは「twitter クッキー ct0 auth_token」等で検索
-1. `target` 項目に収集対象のアカウントscreen_nameを設定する
-    - `status` はenableで収集対象に含める、disableで収集対象としない
+    - 対象アカウントが複数ある場合は `twitter_api_client_list` 配下のリスト要素を増やして設定する
+    - `status` が `enable` であるもののみ対象とする
+        - 一時的に対象外としたいときは `disable` を設定する
 1. `config/config_example.json` をリネームし、 `config/config.json` として配置
 1. `python ./src/personal_twilog/main.py` で起動
 1. 出力された `timeline.db` をsqliteビュワーで開いて確認
