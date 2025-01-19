@@ -38,9 +38,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r ./requirements.lock
 
-    - name: Set config.json
+    - name: Copy config file
       run: |
-        copy ./github/workflows/config_ci.json ./config/config.json
+        copy config_ci.json ../../config/config.json
+        cd ../../config/
+      working-directory: ./.github/workflows
 
     - name: Test with unittest
       run: |
