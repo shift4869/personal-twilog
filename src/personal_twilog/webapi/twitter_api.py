@@ -1,9 +1,11 @@
 import pprint
+from copy import deepcopy
 from logging import INFO, getLogger
 from pathlib import Path
 from typing import Any
 
 import orjson
+from tweeterpy import TweeterPy
 from twitter.scraper import Scraper
 
 from personal_twilog.webapi.valueobject.screen_name import ScreenName
@@ -22,6 +24,20 @@ class TwitterAPI:
     def __init__(self, authorize_screen_name: str, ct0: str, auth_token: str) -> None:
         self.authorize_screen_name = ScreenName(authorize_screen_name)
         self.token = Token.create(self.authorize_screen_name, ct0, auth_token)
+
+        self.ct0 = ct0
+        self.auth_token = auth_token
+        self.target_screen_name = authorize_screen_name
+
+        self.twitter = TweeterPy(log_level="WARNING")
+        self.session_path.parent.mkdir(parents=True, exist_ok=True)
+        self.twitter.generate_session(auth_token=self.auth_token)
+        self.twitter.save_session(path=Path(self.session_path).parent)
+
+    @property
+    def session_path(self) -> Path:
+        """セッションファイルパス"""
+        return Path(__file__).parent / f"cache/session/{self.target_screen_name}.pkl"
 
     @property
     def scraper(self) -> Scraper:
@@ -62,12 +78,14 @@ class TwitterAPI:
         return user_dict
 
     def get_user_id(self, screen_name: ScreenName | str) -> UserId:
-        user_dict: dict = self._get_user(screen_name)
+        # user_dict: dict = self._get_user(screen_name)
+        user_dict: dict = self.twitter.me
         user_id: int = int(self._find_values(user_dict, "rest_id")[0])
         return UserId(user_id)
 
     def get_user_name(self, screen_name: ScreenName | str) -> UserName:
-        user_dict: dict = self._get_user(screen_name)
+        # user_dict: dict = self._get_user(screen_name)
+        user_dict: dict = self.twitter.me
         user_name: str = self._find_values(user_dict, "name")[0]
         return UserName(user_name)
 
@@ -110,10 +128,12 @@ class TwitterAPI:
         result = []
 
         target_id = self.get_user_id(screen_name)
-        timeline_tweets = self.scraper.tweets_and_replies([target_id.id], limit=limit)
+        # scraper = self.twitter.scraper
+        # timeline_tweets = scraper.tweets_and_replies([self.twitter.target_id], limit=limit)
+        timeline_tweets = self.twitter.get_user_tweets(user_id=target_id.id, with_replies=True, total=limit)["data"]
 
-        # entries のみ対象とする（entry にピン留めツイートの情報があるため除外）
-        entry_list: list[dict] = self._find_values(timeline_tweets, "entries")
+        # entry_list: list[dict] = self._find_values(timeline_tweets, "entries")
+        entry_list = deepcopy(timeline_tweets)
         tweet_results: list[dict] = self._find_values(entry_list, "tweet_results")
 
         tweet_list = []
@@ -149,10 +169,9 @@ if __name__ == "__main__":
     config_dict = orjson.loads(Path(CONFIG_FILE_NAME).read_bytes())
 
     config_dict = config_dict["twitter_api_client_list"][0]
-    authorize_screen_name = config_dict["authorize"]["screen_name"]
-    ct0 = config_dict["authorize"]["ct0"]
-    auth_token = config_dict["authorize"]["auth_token"]
-    target_screen_name = config_dict["target"][0]["screen_name"]
+    authorize_screen_name = config_dict["screen_name"]
+    ct0 = config_dict["ct0"]
+    auth_token = config_dict["auth_token"]
     twitter = TwitterAPI(authorize_screen_name, ct0, auth_token)
 
     result: dict | list[dict] = []
@@ -165,5 +184,5 @@ if __name__ == "__main__":
 
     pprint.pprint("TL 取得")
     # result = twitter.get_user_timeline(target_screen_name, 30, 1686617172276359168)
-    result = twitter.get_user_timeline(target_screen_name, 50, -1)
+    result = twitter.get_user_timeline(authorize_screen_name, 50, -1)
     pprint.pprint(len(result))

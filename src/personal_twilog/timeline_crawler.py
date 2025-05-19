@@ -14,6 +14,7 @@ from personal_twilog.db.likes_db import LikesDB
 from personal_twilog.db.media_db import MediaDB
 from personal_twilog.db.metric_db import MetricDB
 from personal_twilog.db.tweet_db import TweetDB
+from personal_twilog.memo_writer import MemoWriter
 from personal_twilog.parser.external_link_parser import ExternalLinkParser
 from personal_twilog.parser.likes_parser import LikesParser
 from personal_twilog.parser.media_parser import MediaParser
@@ -88,6 +89,7 @@ class TimelineCrawler:
         logger.info("Tweet table update -> start")
         tweet_dict_list = TweetParser(tweet_list, self.registered_at).parse()
         self.tweet_db.upsert(tweet_dict_list)
+        MemoWriter().search_and_write(tweet_dict_list)
         logger.info("Tweet table update -> done")
 
         # Media
