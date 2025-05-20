@@ -145,6 +145,13 @@ def main(input_base_path: Path, output_db_path: Path) -> Result:
         input_base_path (Path): 入力アーカイブのベースパス
         output_db_path (Path): 結果反映先のDBパス
     """
+    # 入力チェック
+    if not isinstance(input_base_path, Path) or not isinstance(output_db_path, Path):
+        return Result.failed
+    if not input_base_path.is_dir():
+        return Result.failed
+    if not output_db_path.is_file():
+        return Result.failed
 
     # DB生成
     engine = create_engine(f"sqlite:///{output_db_path}")
@@ -159,10 +166,18 @@ def main(input_base_path: Path, output_db_path: Path) -> Result:
     session.execute(text(truncate_query))
     session.commit()
 
-    # json ファイル読み込み
+    # 対象jsonファイルパス収集
     json_dir = input_base_path / "data"
+    if not json_dir.is_dir():
+        json_dir = input_base_path / input_base_path.name / "data"
+        if not json_dir.is_dir():
+            return Result.failed
     json_path_list = [json_dir / "tweets.js"]
     json_path_list.extend(json_dir.glob("tweets-part*"))
+    if not json_path_list:
+        return Result.failed
+
+    # 対象jsonファイル読み込み
     tweet_list: list[ArchivedTweet] = []
     for i, json_path in enumerate(json_path_list):
         all_str = json_path.read_text("utf8")
@@ -186,6 +201,7 @@ def main(input_base_path: Path, output_db_path: Path) -> Result:
 
 
 if __name__ == "__main__":
-    input_base_path = Path("I:/Users/shift/Documents/twitter_backup/twitter-2023-09-22")
-    output_db_path = Path("D:/Users/shift/Documents/git/personal-twilog/timeline.db")
-    main(input_base_path, output_db_path)
+    input_base_path = Path("I:/Users/shift/Documents/twitter_backup/twitter-2025-05-20")
+    output_db_path = Path("D:/Users/shift/Documents/git/personal-twilog-run/timeline.db")
+    result = main(input_base_path, output_db_path)
+    print("Done." if result == Result.success else "Abort.")
