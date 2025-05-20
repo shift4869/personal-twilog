@@ -17,11 +17,11 @@ anyio==4.9.0
 beautifulsoup4==4.12.2
     # via tweeterpy
     # via xclienttransaction
-certifi==2025.1.31
+certifi==2025.4.26
     # via httpcore
     # via httpx
     # via requests
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 colorama==0.4.6
     # via tqdm
@@ -31,7 +31,7 @@ demjson3==3.0.6
     # via tweeterpy
 freezegun==1.5.1
     # via personal-twilog
-greenlet==3.2.1
+greenlet==3.2.2
     # via sqlalchemy
 h11==0.16.0
     # via httpcore
@@ -54,7 +54,7 @@ mock==5.2.0
     # via personal-twilog
 nest-asyncio==1.6.0
     # via twitter-api-client
-orjson==3.10.16
+orjson==3.10.18
     # via personal-twilog
     # via twitter-api-client
 pycodestyle==2.13.0
@@ -65,7 +65,7 @@ python-dateutil==2.9.0.post0
     # via freezegun
 requests==2.32.2
     # via tweeterpy
-ruff==0.11.7
+ruff==0.11.10
     # via personal-twilog
 six==1.17.0
     # via python-dateutil
@@ -73,7 +73,7 @@ sniffio==1.3.1
     # via anyio
 soupsieve==2.7
     # via beautifulsoup4
-sqlalchemy==2.0.40
+sqlalchemy==2.0.41
     # via personal-twilog
 tqdm==4.67.1
     # via twitter-api-client
