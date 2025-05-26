@@ -21,15 +21,15 @@ class TweetParser(ParserBase):
                 continue
             tweet_legacy: dict = tweet["legacy"]
             tweet_user: dict = tweet["core"]["user_results"]["result"]
-            tweet_user_legacy: dict = tweet_user["legacy"]
+            # tweet_user_legacy: dict = tweet_user["legacy"]
 
             tweet_id: str = tweet["rest_id"]
             tweet_text: str = tweet_legacy["full_text"]
             via_html: str = tweet["source"]
             tweet_via = re.findall("^<.+?>([^<]*?)<.+?>$", via_html)[0]
             user_id: str = tweet_user["rest_id"]
-            user_name: str = tweet_user_legacy["name"]
-            screen_name: str = tweet_user_legacy["screen_name"]
+            user_name: str = tweet_user["core"]["name"]
+            screen_name: str = tweet_user["core"]["screen_name"]
             tweet_url: str = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
             # rt, qt があるかどうか
@@ -83,8 +83,8 @@ class TweetParser(ParserBase):
 
 
 if __name__ == "__main__":
-    data_cache_path = Path("./data/175674367/")
-    cache_path = list(data_cache_path.glob("*UserTweetsAndReplies*"))[-1]
+    data_cache_path = Path("./data/cache_20250523/175674367/")
+    cache_path = list(data_cache_path.glob("*Likes*"))[-1]
     tweet_dict = orjson.loads(cache_path.read_bytes())
     entry_list: list[dict] = find_values(tweet_dict, "entries")
     tweet_results: list[dict] = find_values(entry_list, "tweet_results")

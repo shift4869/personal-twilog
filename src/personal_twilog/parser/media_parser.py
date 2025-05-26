@@ -35,7 +35,12 @@ class MediaParser(ParserBase):
             tweet_text: str = tweet_legacy["full_text"]
             via_html: str = tweet["source"]
             tweet_via = re.findall("^<.+?>([^<]*?)<.+?>$", via_html)[0]
-            screen_name: str = tweet_user_legacy["screen_name"]
+
+            legacy_screen_name: str = tweet_user_legacy.get("screen_name", "")
+            core_screen_name: str = tweet_user.get("core", {}).get("screen_name", "")
+            screen_name: str = legacy_screen_name or core_screen_name
+            if not screen_name:
+                raise ValueError("Not Found screen_name")
             tweet_url: str = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
             created_at = self._get_created_at(tweet)

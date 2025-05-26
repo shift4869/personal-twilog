@@ -24,10 +24,11 @@ class MetricParser(ParserBase):
             if not user_dict:
                 continue
             user_legacy: dict = user_dict.get("legacy", {})
-            if self.target_screen_name != user_legacy.get("screen_name"):
+            screen_name: str = user_dict.get("core", {}).get("screen_name", "")
+            if self.target_screen_name != screen_name:
                 continue
             metric_dict = {
-                "screen_name": user_legacy["screen_name"],
+                "screen_name": screen_name,
                 "status_count": user_legacy["statuses_count"],
                 "favorite_count": user_legacy["favourites_count"],
                 "media_count": user_legacy["media_count"],

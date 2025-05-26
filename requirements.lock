@@ -25,11 +25,11 @@ charset-normalizer==3.4.2
     # via requests
 colorama==0.4.6
     # via tqdm
-coverage==7.8.0
+coverage==7.8.2
     # via personal-twilog
 demjson3==3.0.6
     # via tweeterpy
-freezegun==1.5.1
+freezegun==1.5.2
     # via personal-twilog
 greenlet==3.2.2
     # via sqlalchemy
@@ -65,7 +65,7 @@ python-dateutil==2.9.0.post0
     # via freezegun
 requests==2.32.2
     # via tweeterpy
-ruff==0.11.10
+ruff==0.11.11
     # via personal-twilog
 six==1.17.0
     # via python-dateutil
