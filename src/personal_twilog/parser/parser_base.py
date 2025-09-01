@@ -256,7 +256,7 @@ class ParserBase:
         edited_tweet_list: list[dict] = []
         flattened_tweet_list: list[dict] = []
         for tweet in tweet_list:
-            tweet = tweet.get("result", {})
+            tweet: dict = tweet.get("result", {})
             # 辞書構造が異なる場合がある
             if tweet.get("__typename", "") == "TweetWithVisibilityResults":
                 # 閲覧アカウントを制限しているツイート

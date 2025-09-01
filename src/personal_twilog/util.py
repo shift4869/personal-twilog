@@ -1,10 +1,32 @@
 from enum import Enum, auto
+from functools import reduce
 from typing import Any
 
 
 class Result(Enum):
     success = auto()
     failed = auto()
+
+
+def find_value(target_dict: dict, key_path: tuple[str], default: Any = "") -> Any:
+    """辞書をキーのパスで探索して値を取り出す
+
+    functools.reduce は 2値を受け取る関数, イテラブル, 初期値 を受け取る高階関数である
+    たとえば reduce(lambda x, y: x+y, [1, 2, 3, 4, 5], 10) = 25 となる
+    初期値に辞書、2値関数に辞書から値を取り出す関数（実質__getitem__）、
+    イテラブルにキーのリストを渡すと、繰り返し適用されて辞書を掘ることができる
+    たとえば t = {"a":{"b":{"c":{"d":{"e": "value"}}}}} のとき
+    reduce(lambda v, k: v[k], ("a", "b", "c", "d", "e") , t) = "value" となる
+
+    Args:
+        target_dict (dict): 探索対象の辞書
+        key_path (tuple[str]): キーのパス
+        default (Any): 探索失敗時に返すデフォルト値
+
+    Returns:
+        Any: 辞書の値, 見つからなかった場合 default を返す
+    """
+    return reduce(lambda v, k: v.get(k, default) if isinstance(v, dict) else default, key_path, target_dict)
 
 
 def find_values(
@@ -43,3 +65,23 @@ def find_values(
     if len(result) > 1:
         raise ValueError(f"Value of key='{key}' are multiple found.")
     return result[0]
+
+
+def remove_duplicates(dict_list: list[dict]) -> list[dict]:
+    if not isinstance(dict_list, list):
+        raise TypeError("Argument dict_list is not list.")
+    if not all([isinstance(d, dict) for d in dict_list]):
+        raise TypeError("Argument dict_list is not list[dict].")
+
+    dup_target_key = "tweet_id"
+    key_check = [d.get(dup_target_key, "") != "" for d in dict_list]
+    if not all(key_check):
+        raise ValueError(f"Argument dict_list include element that not has '{dup_target_key}' key.")
+
+    seen = []
+    dict_list = [
+        d
+        for d in dict_list
+        if (tweet_id := d.get(dup_target_key, "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
+    ]
+    return dict_list

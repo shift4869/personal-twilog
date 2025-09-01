@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import orjson
+import orjson.orjson
 from tweeterpy import TweeterPy
 from twitter.scraper import Scraper
 
@@ -32,7 +33,7 @@ class TwitterAPI:
         self.twitter = TweeterPy(log_level="WARNING")
         self.session_path.parent.mkdir(parents=True, exist_ok=True)
         self.twitter.generate_session(auth_token=self.auth_token)
-        self.twitter.save_session(path=Path(self.session_path).parent)
+        # self.twitter.save_session(path=Path(self.session_path).parent)
 
     @property
     def session_path(self) -> Path:
@@ -131,6 +132,8 @@ class TwitterAPI:
         # scraper = self.twitter.scraper
         # timeline_tweets = scraper.tweets_and_replies([self.twitter.target_id], limit=limit)
         timeline_tweets = self.twitter.get_user_tweets(user_id=target_id.id, with_replies=True, total=limit)["data"]
+        data_cache_path = Path("./data/get_user_tweets.json")
+        data_cache_path.write_bytes(orjson.dumps(timeline_tweets, option=orjson.OPT_INDENT_2))
 
         # entry_list: list[dict] = self._find_values(timeline_tweets, "entries")
         entry_list = deepcopy(timeline_tweets)
