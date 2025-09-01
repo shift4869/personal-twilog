@@ -52,6 +52,7 @@ class MemoWriter:
             exist_sentence = exist_sentence + "\n"
         # 末尾がmemoそのものなら二重登録と判断して置き換えをしない
         if exist_sentence.endswith(f"{memo}\n"):
+            logger.info("No text written.")
             return Result.success
 
         # 置き換え後の文字列を生成
@@ -63,6 +64,7 @@ class MemoWriter:
 
         # 置き換え後のテキストを書き込む
         self.dst_path.write_text(updated_content, encoding="utf-8")
+        logger.info(f"Text written:{memo}.")
         logger.info("MemoWriter write -> done")
         return Result.success
 
@@ -72,7 +74,8 @@ class MemoWriter:
             return Result.failed
         for tweet_dict in tweet_dict_list:
             tweet_text: str = tweet_dict["tweet_text"]
-            if tweet_text.startswith("メモ："):
+            created_at: str = tweet_dict["created_at"][:10]
+            if tweet_text.startswith("メモ：") and created_at == self.now_date_str:
                 self.write(tweet_text[3:])
         logger.info("MemoWriter search -> done")
         return Result.success
