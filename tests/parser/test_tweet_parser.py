@@ -3,6 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
+from mock import patch
 import orjson
 
 from personal_twilog.parser.tweet_parser import TweetParser
@@ -14,10 +15,11 @@ class TestTweetParser(unittest.TestCase):
         return orjson.loads(Path("./tests/cache/timeline_sample.json").read_bytes())
 
     def get_instance(self) -> TweetParser:
+        self.enterContext(patch("personal_twilog.parser.tweet_parser.logger"))
         timeline_dict = self.get_json_dict()
         entry_list: list[dict] = find_values(timeline_dict, "entries")
         tweet_dict_list: list[dict] = find_values(entry_list, "tweet_results")
-        registered_at = "2023-10-07T01:00:00"
+        registered_at = "2026-02-08T01:00:00"
         parser = TweetParser(tweet_dict_list, registered_at)
         return parser
 
@@ -29,7 +31,7 @@ class TestTweetParser(unittest.TestCase):
         actual = self.get_instance()
         self.assertEqual(expect, actual.tweet_dict_list)
         self.assertEqual(expect, actual.result)
-        self.assertEqual("2023-10-07T01:00:00", actual.registered_at)
+        self.assertEqual("2026-02-08T01:00:00", actual.registered_at)
 
     def test_parse(self):
         parser = self.get_instance()
@@ -45,15 +47,14 @@ class TestTweetParser(unittest.TestCase):
                     continue
                 tweet_legacy: dict = tweet["legacy"]
                 tweet_user: dict = tweet["core"]["user_results"]["result"]
-                tweet_user_legacy: dict = tweet_user["legacy"]
 
                 tweet_id: str = tweet["rest_id"]
                 tweet_text: str = tweet_legacy["full_text"]
                 via_html: str = tweet["source"]
                 tweet_via = re.findall("^<.+?>([^<]*?)<.+?>$", via_html)[0]
                 user_id: str = tweet_user["rest_id"]
-                user_name: str = tweet_user_legacy["name"]
-                screen_name: str = tweet_user_legacy["screen_name"]
+                user_name: str = tweet_user["core"]["name"]
+                screen_name: str = tweet_user["core"]["screen_name"]
                 tweet_url: str = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
                 retweet_tweet, quote_tweet = parser._match_rt_quote(tweet)

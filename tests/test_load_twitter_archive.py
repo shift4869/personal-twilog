@@ -1,6 +1,7 @@
 import shutil
 import sys
 import unittest
+from collections import namedtuple
 from pathlib import Path
 
 import orjson
@@ -74,22 +75,94 @@ class TestLoadTwitterArchive(unittest.TestCase):
 
         mock_tqdm.side_effect = lambda any_list, desc: any_list
 
-        input_json_file = "archived_tweets_sample.json"
-        input_js_path = Path("./tests/cache/data") / "tweets.js"
-        input_base_path = Path("./tests/cache/")
-        output_db_path = Path(":memory:")
+        Params = namedtuple("Params", ["kind", "result"])
 
-        input_js_path.parent.mkdir(exist_ok=True, parents=True)
-        shutil.rmtree(input_js_path.parent)
-        input_js_path.parent.mkdir(exist_ok=True, parents=True)
-        shutil.copy2(input_base_path / input_json_file, input_js_path.parent)
-        (input_js_path.parent / input_json_file).rename(input_js_path)
+        def pre_run(params: Params) -> tuple[Path, Path]:
+            ref_archived_json_path = Path("./tests/cache") / "archived_tweets_sample.json"
+            input_path = Path("./tests/cache/archive/data") / "tweets.js"
+            output_db_path = Path("./tests/cache/archive/data") / "archived_tweets_test.db"
 
-        actual = main(input_base_path, output_db_path)
-        self.assertEqual(Result.success, actual)
+            input_path.parent.mkdir(exist_ok=True, parents=True)
+            shutil.rmtree(input_path.parent.parent)
+            input_path.parent.mkdir(exist_ok=True, parents=True)
 
-        shutil.rmtree(input_js_path.parent)
-        pass
+            if params.kind == "normal":
+                # 正常系
+                output_db_path.touch()
+                shutil.copy2(ref_archived_json_path, input_path.parent)
+                (input_path.parent / ref_archived_json_path.name).rename(input_path)
+                return input_path.parent.parent, output_db_path
+            elif params.kind == "predict_path":
+                # 正常系（展開ディレクトリ重複吸収）
+                shutil.rmtree(input_path.parent.parent)
+                input_path = input_path.parent.parent / "archive" / "data" / input_path.name
+                input_path.parent.mkdir(exist_ok=True, parents=True)
+
+                output_db_path = input_path.parent / output_db_path.name
+                output_db_path.touch()
+
+                shutil.copy2(ref_archived_json_path, input_path.parent)
+                (input_path.parent / ref_archived_json_path.name).rename(input_path)
+                input_path = input_path.parent
+                return input_path.parent.parent, output_db_path
+            elif params.kind == "not_exist_js":
+                # "tweets.js" が存在しない
+                output_db_path.touch()
+                shutil.copy2(ref_archived_json_path, input_path.parent)
+                (input_path.parent / ref_archived_json_path.name).rename(input_path.parent / "invalid.js")
+                return input_path.parent.parent, output_db_path
+            elif params.kind == "invalid_dir":
+                # ディレクトリ構造が不正
+                shutil.rmtree(input_path.parent.parent)
+                input_path = input_path.parent.parent / "invalid" / "data" / input_path.name
+                input_path.parent.mkdir(exist_ok=True, parents=True)
+
+                output_db_path = input_path.parent / output_db_path.name
+                output_db_path.touch()
+
+                shutil.copy2(ref_archived_json_path, input_path.parent)
+                (input_path.parent / ref_archived_json_path.name).rename(input_path)
+                input_path = input_path.parent
+                return input_path.parent.parent, output_db_path
+            elif params.kind == "not_exist_output_path":
+                # 出力DBパスが不正
+                # output_db_path.touch()  # 出力DBを作成しない
+                return input_path.parent.parent, output_db_path
+            elif params.kind == "not_exist_input_path":
+                # 入力ディレクトリパスが不正
+                return input_path, output_db_path
+            elif params.kind == "invalid_type":
+                # 引数の型が不正
+                return "invalid_path", "invalid_path"
+
+        def post_run(actual: Result, params: Params) -> None:
+            self.assertEqual(params.result, actual)
+
+        params_list = [
+            Params("normal", Result.success),
+            Params("predict_path", Result.success),
+            Params("not_exist_js", Result.failed),
+            Params("invalid_dir", Result.failed),
+            Params("not_exist_output_path", Result.failed),
+            Params("not_exist_input_path", Result.failed),
+            Params("invalid_type", Result.failed),
+        ]
+        for params in params_list:
+            input_base_path, output_db_path = pre_run(params)
+            actual = main(input_base_path, output_db_path)
+            post_run(actual, params)
+
+        # 対象.jsファイルが存在しなかった
+        # shutil.rmtree(input_js_path.parent)
+        # input_js_path.parent.mkdir(exist_ok=True, parents=True)
+        # output_db_path.touch()
+
+        # actual = main(input_base_path, output_db_path)
+        # self.assertEqual(Result.failed, actual)
+
+        cache_archive_path = Path("./tests/cache/archive")
+        cache_archive_path.parent.mkdir(exist_ok=True, parents=True)
+        shutil.rmtree(cache_archive_path)
 
 
 if __name__ == "__main__":

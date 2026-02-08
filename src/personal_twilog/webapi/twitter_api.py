@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 import orjson
-import orjson.orjson
 from tweeterpy import TweeterPy
 from twitter.scraper import Scraper
 
@@ -79,13 +78,11 @@ class TwitterAPI:
         return user_dict
 
     def get_user_id(self, screen_name: ScreenName | str) -> UserId:
-        # user_dict: dict = self._get_user(screen_name)
         user_dict: dict = self.twitter.me
         user_id: int = int(self._find_values(user_dict, "rest_id")[0])
         return UserId(user_id)
 
     def get_user_name(self, screen_name: ScreenName | str) -> UserName:
-        # user_dict: dict = self._get_user(screen_name)
         user_dict: dict = self.twitter.me
         user_name: str = self._find_values(user_dict, "name")[0]
         return UserName(user_name)
@@ -108,16 +105,10 @@ class TwitterAPI:
                 data_dict: dict = {"result": t}
             if data_dict:
                 tweet_list.append(data_dict)
-            # min_id が指定されている場合
-            if min_id > -1:
-                # 現在の id_str を取得して min_id と一致していたら取得を打ち切る
-                tweet_ids = []
-                try:
-                    tweet_ids = self._find_values(data_dict, "rest_id")
-                except Exception:
-                    continue
-                if str(min_id) in tweet_ids:
-                    break
+            # 現在の id_str を取得して min_id と一致していたら取得を打ち切る
+            tweet_ids = self._find_values(data_dict, "rest_id")
+            if str(min_id) in tweet_ids:
+                break
         result.extend(tweet_list)
 
         result = tweet_list[:limit]
@@ -129,8 +120,6 @@ class TwitterAPI:
         result = []
 
         target_id = self.get_user_id(screen_name)
-        # scraper = self.twitter.scraper
-        # timeline_tweets = scraper.tweets_and_replies([self.twitter.target_id], limit=limit)
         timeline_tweets = self.twitter.get_user_tweets(user_id=target_id.id, with_replies=True, total=limit)["data"]
         data_cache_path = Path("./data/get_user_tweets.json")
         data_cache_path.write_bytes(orjson.dumps(timeline_tweets, option=orjson.OPT_INDENT_2))
@@ -146,16 +135,10 @@ class TwitterAPI:
                 data_dict: dict = {"result": t}
             if data_dict:
                 tweet_list.append(data_dict)
-            # min_id が指定されている場合
-            if min_id > -1:
-                # 現在の id_str を取得して min_id と一致していたら取得を打ち切る
-                tweet_ids = []
-                try:
-                    tweet_ids = self._find_values(data_dict, "rest_id")
-                except Exception:
-                    continue
-                if str(min_id) in tweet_ids:
-                    break
+            # 現在の id_str を取得して min_id と一致していたら取得を打ち切る
+            tweet_ids = self._find_values(data_dict, "rest_id")
+            if str(min_id) in tweet_ids:
+                break
         result.extend(tweet_list)
 
         result = tweet_list[:limit]

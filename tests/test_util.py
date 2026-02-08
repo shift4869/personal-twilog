@@ -1,17 +1,10 @@
 import sys
 import unittest
-from pathlib import Path
 
-import orjson
-
-from personal_twilog.util import Result, find_values
+from personal_twilog.util import Result, find_values, remove_duplicates
 
 
 class TestUtil(unittest.TestCase):
-    def test_Result(self):
-        self.assertEqual(True, hasattr(Result, "success"))
-        self.assertEqual(True, hasattr(Result, "failed"))
-
     def _make_sample_dict(self) -> dict:
         return [
             {
@@ -23,6 +16,10 @@ class TestUtil(unittest.TestCase):
             }
             for i in range(5)
         ]
+
+    def test_Result(self):
+        self.assertEqual(True, hasattr(Result, "success"))
+        self.assertEqual(True, hasattr(Result, "failed"))
 
     def test_find_values(self):
         sample_dict = self._make_sample_dict()
@@ -102,6 +99,41 @@ class TestUtil(unittest.TestCase):
         # 一意に確定する想定の指定だが、見つからなかった場合
         with self.assertRaises(ValueError):
             actual = find_values(sample_dict, "invalid_key", True)
+
+    def test_remove_duplicates(self):
+        DUP_TARGET_KEY = "tweet_id"
+
+        def get_dict_list() -> list[dict]:
+            d = []
+            for i in range(5):
+                d.append({DUP_TARGET_KEY: str(i)})
+            return d
+
+        def get_dup_dict_list() -> list[dict]:
+            return get_dict_list() + get_dict_list()
+
+        # 正常系
+        dict_list = get_dup_dict_list()
+        actual = remove_duplicates(dict_list)
+        expect = get_dict_list()
+        self.assertEqual(expect, actual)
+
+        # キーが不正
+        dict_list = get_dup_dict_list()
+        for d in dict_list:
+            d["invalid_key"] = d[DUP_TARGET_KEY]
+            del d[DUP_TARGET_KEY]
+        with self.assertRaises(ValueError):
+            actual = remove_duplicates(dict_list)
+
+        # 要素が辞書でない
+        dict_list = [1, 1, 2, 2, 3, 3]
+        with self.assertRaises(ValueError):
+            actual = remove_duplicates(dict_list)
+
+        # 引数がリストでない
+        with self.assertRaises(ValueError):
+            actual = remove_duplicates("invalid_args")
 
 
 if __name__ == "__main__":

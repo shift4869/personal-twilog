@@ -68,20 +68,33 @@ def find_values(
 
 
 def remove_duplicates(dict_list: list[dict]) -> list[dict]:
-    if not isinstance(dict_list, list):
-        raise TypeError("Argument dict_list is not list.")
-    if not all([isinstance(d, dict) for d in dict_list]):
-        raise TypeError("Argument dict_list is not list[dict].")
+    """辞書リストから重複を削除する
 
-    dup_target_key = "tweet_id"
-    key_check = [d.get(dup_target_key, "") != "" for d in dict_list]
+    リストの要素について、 DUP_TARGET_KEY をキーとして、その値が重複している要素を排除する
+
+    Args:
+        dict_list (list[dict]): 対象辞書リスト
+
+    Raises:
+        ValueError: 引数の型が不正、または DUP_TARGET_KEY をキーとする要素の辞書のリストではなかった
+
+    Returns:
+        list[dict]: 重複を排除した辞書リスト
+    """
+    if not isinstance(dict_list, list):
+        raise ValueError("Argument dict_list is not list.")
+    if not all([isinstance(d, dict) for d in dict_list]):
+        raise ValueError("Argument dict_list is not list[dict].")
+
+    DUP_TARGET_KEY = "tweet_id"
+    key_check = [d.get(DUP_TARGET_KEY, "") != "" for d in dict_list]
     if not all(key_check):
-        raise ValueError(f"Argument dict_list include element that not has '{dup_target_key}' key.")
+        raise ValueError(f"Argument dict_list include element that not has '{DUP_TARGET_KEY}' key.")
 
     seen = []
     dict_list = [
         d
         for d in dict_list
-        if (tweet_id := d.get(dup_target_key, "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
+        if (tweet_id := d.get(DUP_TARGET_KEY, "")) != "" and (tweet_id not in seen) and (not seen.append(tweet_id))
     ]
     return dict_list

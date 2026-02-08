@@ -25,7 +25,6 @@ class TweetParser(ParserBase):
                 continue
             tweet_legacy: dict = find_value(tweet, ["legacy"])
             tweet_user: dict = find_value(tweet, ["core", "user_results", "result"])
-            # tweet_user_legacy: dict = tweet_user["legacy"]
 
             if not all([tweet_legacy, tweet_user]):
                 msg = "tweet_legacy, tweet_user"

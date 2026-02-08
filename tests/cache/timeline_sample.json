@@ -24,6 +24,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "10011",
+                                  "core": {
+                                    "name": "user_name_01",
+                                    "screen_name": "screen_name_1"
+                                  },
                                   "legacy": {
                                     "name": "user_name_01",
                                     "screen_name": "screen_name_1",
@@ -67,6 +71,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "20022",
+                                  "core": {
+                                    "name": "user_name_02",
+                                    "screen_name": "screen_name_2"
+                                  },
                                   "legacy": {
                                     "name": "user_name_02",
                                     "screen_name": "screen_name_2",
@@ -186,6 +194,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "30033",
+                                  "core": {
+                                    "name": "user_name_03",
+                                    "screen_name": "screen_name_3"
+                                  },
                                   "legacy": {
                                     "name": "user_name_03",
                                     "screen_name": "screen_name_3",
@@ -397,6 +409,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "40044",
+                                  "core": {
+                                    "name": "user_name_04",
+                                    "screen_name": "screen_name_4"
+                                  },
                                   "legacy": {
                                     "name": "user_name_04",
                                     "screen_name": "screen_name_4",
@@ -562,6 +578,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "50055",
+                                  "core": {
+                                    "name": "user_name_05",
+                                    "screen_name": "screen_name_5"
+                                  },
                                   "legacy": {
                                     "name": "user_name_05",
                                     "screen_name": "screen_name_5",
@@ -714,6 +734,10 @@
                                     "user_results": {
                                       "result": {
                                         "rest_id": "55055",
+                                        "core": {
+                                          "name": "user_name_05",
+                                          "screen_name": "screen_name_5_rt"
+                                        },
                                         "legacy": {
                                           "name": "user_name_05",
                                           "screen_name": "screen_name_5_rt",
@@ -886,6 +910,10 @@
                                   "user_results": {
                                     "result": {
                                       "rest_id": "60666",
+                                      "core": {
+                                        "name": "user_name_06",
+                                        "screen_name": "screen_name_6_qt"
+                                      },
                                       "legacy": {
                                         "name": "user_name_06",
                                         "screen_name": "screen_name_6_qt",
@@ -1037,6 +1065,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "60066",
+                                  "core": {
+                                    "name": "user_name_06",
+                                    "screen_name": "screen_name_6"
+                                  },
                                   "legacy": {
                                     "name": "user_name_06",
                                     "screen_name": "screen_name_6",
@@ -1202,6 +1234,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "70077",
+                                  "core": {
+                                    "name": "user_name_07",
+                                    "screen_name": "screen_name_7"
+                                  },
                                   "legacy": {
                                     "name": "user_name_07",
                                     "screen_name": "screen_name_7",
@@ -1356,6 +1392,10 @@
                                         "user_results": {
                                           "result": {
                                             "rest_id": "70777",
+                                            "core": {
+                                              "name": "user_name_07",
+                                              "screen_name": "screen_name_7_rt_qt"
+                                            },
                                             "legacy": {
                                               "name": "user_name_07",
                                               "screen_name": "screen_name_7_rt_qt",
@@ -1509,6 +1549,10 @@
                                     "user_results": {
                                       "result": {
                                         "rest_id": "70777",
+                                        "core": {
+                                          "name": "user_name_07",
+                                          "screen_name": "screen_name_7_rt_qt"
+                                        },
                                         "legacy": {
                                           "name": "user_name_07",
                                           "screen_name": "screen_name_7_rt_qt",
@@ -1677,6 +1721,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "80088",
+                                  "core": {
+                                    "name": "user_name_08",
+                                    "screen_name": "screen_name_8"
+                                  },
                                   "legacy": {
                                     "name": "user_name_08",
                                     "screen_name": "screen_name_8",
@@ -1732,6 +1780,10 @@
                               "user_results": {
                                 "result": {
                                   "rest_id": "90099",
+                                  "core": {
+                                    "name": "user_name_09",
+                                    "screen_name": "screen_name_9"
+                                  },
                                   "legacy": {
                                     "name": "user_name_09",
                                     "screen_name": "screen_name_9",

@@ -174,7 +174,7 @@ def main(input_base_path: Path, output_db_path: Path) -> Result:
             return Result.failed
     json_path_list = [json_dir / "tweets.js"]
     json_path_list.extend(json_dir.glob("tweets-part*"))
-    if not json_path_list:
+    if not all([path.is_file() for path in json_path_list]):
         return Result.failed
 
     # 対象jsonファイル読み込み

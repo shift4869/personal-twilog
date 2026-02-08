@@ -1,13 +1,10 @@
 import logging.config
 import re
-import shutil
 from datetime import datetime
-from enum import Enum, auto
 from logging import INFO, getLogger
 from pathlib import Path
 
 import orjson
-from dateutil.relativedelta import relativedelta
 
 from personal_twilog.util import Result
 
@@ -16,12 +13,12 @@ logger.setLevel(INFO)
 
 
 class MemoWriter:
+    CONFIG_FILE_NAME = "./config/config.json"
     INSERT_TARGET_MARKER = "#### メモ\n\n"
 
     def __init__(self) -> None:
         logger.info("MemoWriter init -> start")
-        CONFIG_FILE_NAME = "./config/config.json"
-        config = orjson.loads(Path(CONFIG_FILE_NAME).read_bytes())
+        config = orjson.loads(Path(MemoWriter.CONFIG_FILE_NAME).read_bytes())
 
         self.config = config["memo_writer"]
 
@@ -50,6 +47,7 @@ class MemoWriter:
         # 取得文字列が末尾が\nでないなら補完
         if not exist_sentence.endswith("\n"):
             exist_sentence = exist_sentence + "\n"
+            content = content + "\n"
         # 末尾がmemoそのものなら二重登録と判断して置き換えをしない
         if exist_sentence.endswith(f"{memo}\n"):
             logger.info("No text written.")
@@ -68,25 +66,24 @@ class MemoWriter:
         logger.info("MemoWriter write -> done")
         return Result.success
 
-    def search(self, tweet_dict_list: list[dict]) -> Result:
-        logger.info("MemoWriter search -> start")
+    def search_and_write(self, tweet_dict_list: list[dict]) -> Result:
+        logger.info("MemoWriter search_and_write -> start")
+        written_flag = False
         if not self.is_enable:
-            return Result.failed
+            logger.info("Diary note is not exists.")
+            logger.info("MemoWriter search_and_write -> done")
+            return Result.success
+
         for tweet_dict in tweet_dict_list:
             tweet_text: str = tweet_dict["tweet_text"]
             created_at: str = tweet_dict["created_at"][:10]
             if tweet_text.startswith("メモ：") and created_at == self.now_date_str:
                 self.write(tweet_text[3:])
-        logger.info("MemoWriter search -> done")
-        return Result.success
+                written_flag = True
 
-    def search_and_write(self, tweet_dict_list: list[dict]) -> Result:
-        logger.info("MemoWriter search_and_write -> start")
-        if not self.is_enable:
+        if not written_flag:
             logger.info("Memo is not included.")
-            logger.info("MemoWriter search_and_write -> done")
-            return Result.success
-        self.search(tweet_dict_list)
+
         logger.info("MemoWriter search_and_write -> done")
         return Result.success
 
