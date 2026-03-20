@@ -29,7 +29,7 @@ class TwitterAPI:
         self.auth_token = auth_token
         self.target_screen_name = authorize_screen_name
 
-        self.twitter = TweeterPy(log_level="WARNING")
+        self.twitter = TweeterPy()
         self.session_path.parent.mkdir(parents=True, exist_ok=True)
         self.twitter.generate_session(auth_token=self.auth_token)
         # self.twitter.save_session(path=Path(self.session_path).parent)
