@@ -3,11 +3,15 @@ import sys
 import urllib.parse
 from abc import abstractmethod
 from datetime import datetime, timedelta
+from logging import INFO, getLogger
 from pathlib import Path
 
 import requests
 
 from personal_twilog.util import find_values
+
+logger = getLogger(__name__)
+logger.setLevel(INFO)
 
 
 class ParserBase:
@@ -311,7 +315,11 @@ class ParserBase:
                 } if l1 != {} and l2 != {} and rest_id != "" and source != "":
                     pass
                 case _:
-                    raise ValueError("flatten failed. invalid '__typename' or structure.")
+                    # raise ValueError("flatten failed. invalid '__typename' or structure.")
+                    logger.warning("flatten failed. invalid '__typename' or structure.")
+                    logger.warning(f"__typename is: {tweet.get('__typename', 'unknown typename')}")
+                    logger.warning(f"keys: {', '.join(tweet.keys())}")
+                    continue
             edited_tweet_list.append(tweet)
         return edited_tweet_list
 
