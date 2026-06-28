@@ -21,6 +21,7 @@ from personal_twilog.parser.media_parser import MediaParser
 from personal_twilog.parser.metric_parser import MetricParser
 from personal_twilog.parser.tweet_parser import TweetParser
 from personal_twilog.stats.timeline_stats import TimelineStats
+from personal_twilog.util import log_suppress
 from personal_twilog.webapi.twitter_api import TwitterAPI
 
 logger = getLogger(__name__)
@@ -49,6 +50,9 @@ class TimelineCrawler:
         self.media_db = MediaDB()
         self.metric_db = MetricDB()
         self.external_link_db = ExternalLinkDB()
+
+        # sqlalchemy 系のログ抑止
+        log_suppress()
 
         # 各DBで共通に使う registered_at を取得
         self.registered_at = datetime.now().replace(microsecond=0).isoformat()

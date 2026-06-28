@@ -201,7 +201,7 @@ def main(input_base_path: Path, output_db_path: Path) -> Result:
 
 
 if __name__ == "__main__":
-    input_base_path = Path("I:/Users/shift/Documents/twitter_backup/twitter-2026-02-26")
+    input_base_path = Path("I:/Users/shift/Documents/twitter_backup/twitter-2026-06-18")
     output_db_path = Path("D:/Users/shift/Documents/git/personal-twilog-run/timeline.db")
     result = main(input_base_path, output_db_path)
     print("Done." if result == Result.success else "Abort.")

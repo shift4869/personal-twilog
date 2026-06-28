@@ -6,17 +6,17 @@ authors = [
     { name = "shift" }
 ]
 dependencies = [
-    "coverage>=7.8.2",
-    "freezegun>=1.5.2",
+    "coverage>=7.14.3",
+    "freezegun>=1.5.5",
     "httpx>=0.28.1",
-    "isort>=6.0.1",
+    "isort>=8.0.1",
     "mock>=5.2.0",
-    "orjson>=3.10.18",
-    "pycodestyle>=2.13.0",
-    "ruff>=0.11.11",
+    "orjson>=3.11.9",
+    "pycodestyle>=2.14.0",
+    "ruff>=0.15.20",
     "requests>=2.32.5",
-    "sqlalchemy>=2.0.41",
-    "tweeterpy>=2.0.15",
+    "sqlalchemy>=2.0.51",
+    "tweeterpy>=2.0.17",
     "twitter-api-client>=0.10.22",
 ]
 readme = "README.md"
@@ -57,7 +57,7 @@ dev-dependencies = []
 [tool.rye.scripts]
 unittest = "python -m unittest"
 cover = {chain = ["coverage run --source . -m unittest discover", "coverage html"]}
-copy_to_run = "./copy_to_run.vbs"
+deploy = "./copy_to_run.bat"
 
 [tool.hatch.metadata]
 allow-direct-references = true

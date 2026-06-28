@@ -12,23 +12,23 @@
 -e file:.
 aiofiles==25.1.0
     # via twitter-api-client
-anyio==4.12.1
+anyio==4.14.1
     # via httpx
 beautifulsoup4==4.12.2
     # via tweeterpy
     # via xclienttransaction
-certifi==2026.2.25
+certifi==2026.6.17
     # via curl-cffi
     # via httpcore
     # via httpx
     # via requests
 cffi==2.0.0
     # via curl-cffi
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
     # via requests
 colorama==0.4.6
     # via tqdm
-coverage==7.13.5
+coverage==7.14.3
     # via personal-twilog
 curl-cffi==0.13.0
     # via tweeterpy
@@ -36,7 +36,7 @@ demjson3==3.0.6
     # via tweeterpy
 freezegun==1.5.5
     # via personal-twilog
-greenlet==3.3.2
+greenlet==3.5.3
     # via sqlalchemy
 h11==0.16.0
     # via httpcore
@@ -45,7 +45,7 @@ httpcore==1.0.9
 httpx==0.28.1
     # via personal-twilog
     # via twitter-api-client
-idna==3.11
+idna==3.18
     # via anyio
     # via httpx
     # via requests
@@ -59,7 +59,7 @@ mock==5.2.0
     # via personal-twilog
 nest-asyncio==1.6.0
     # via twitter-api-client
-orjson==3.11.7
+orjson==3.11.9
     # via personal-twilog
     # via twitter-api-client
 pycodestyle==2.14.0
@@ -70,28 +70,28 @@ pyotp==2.9.0
     # via tweeterpy
 python-dateutil==2.9.0.post0
     # via freezegun
-requests==2.32.5
+requests==2.34.2
     # via personal-twilog
-ruff==0.15.6
+ruff==0.15.20
     # via personal-twilog
 six==1.17.0
     # via python-dateutil
-soupsieve==2.8.3
+soupsieve==2.8.4
     # via beautifulsoup4
-sqlalchemy==2.0.48
+sqlalchemy==2.0.51
     # via personal-twilog
-tqdm==4.67.3
+tqdm==4.68.3
     # via twitter-api-client
-tweeterpy==2.0.15
+tweeterpy==2.0.17
     # via personal-twilog
 twitter-api-client==0.10.22
     # via personal-twilog
 typing-extensions==4.15.0
     # via anyio
     # via sqlalchemy
-urllib3==2.6.3
+urllib3==2.7.0
     # via requests
 websockets==16.0
     # via twitter-api-client
-xclienttransaction==1.0.2
+xclienttransaction==1.0.3
     # via tweeterpy

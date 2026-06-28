@@ -1,11 +1,19 @@
+import logging
 from enum import Enum, auto
 from functools import reduce
+from logging import getLogger
 from typing import Any
 
 
 class Result(Enum):
     success = auto()
     failed = auto()
+
+
+def log_suppress():
+    for name in logging.root.manager.loggerDict:
+        if "personal_twilog" not in name and "__main__" not in name:
+            getLogger(name).disabled = True
 
 
 def find_value(target_dict: dict, key_path: tuple[str], default: Any = "") -> Any:
