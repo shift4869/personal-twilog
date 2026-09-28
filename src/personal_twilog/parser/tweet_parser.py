@@ -34,8 +34,8 @@ class TweetParser(ParserBase):
             tweet_id: str = find_value(tweet, ["rest_id"])
             tweet_text: str = find_value(tweet_legacy, ["full_text"])
             user_id: str = find_value(tweet_user, ["rest_id"])
-            user_name: str = find_value(tweet_user, ["core", "name"])
-            screen_name: str = find_value(tweet_user, ["core", "screen_name"])
+            user_name: str = find_value(tweet_user, ["legacy", "name"])
+            screen_name: str = find_value(tweet_user, ["legacy", "screen_name"])
             tweet_url: str = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
             if not all([tweet_id, tweet_text, user_id, user_name, screen_name, tweet_url]):

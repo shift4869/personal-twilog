@@ -1,4 +1,7 @@
+import math
 import pprint
+import random
+import time
 from copy import deepcopy
 from logging import INFO, getLogger
 from pathlib import Path
@@ -6,8 +9,10 @@ from typing import Any
 
 import orjson
 from tweeterpy import TweeterPy
+from tweeterpy.core.resources import XOperations
 from twitter.scraper import Scraper
 
+from personal_twilog.util import find_values
 from personal_twilog.webapi.valueobject.screen_name import ScreenName
 from personal_twilog.webapi.valueobject.token import Token
 from personal_twilog.webapi.valueobject.user_id import UserId
@@ -31,8 +36,8 @@ class TwitterAPI:
 
         self.twitter = TweeterPy()
         self.session_path.parent.mkdir(parents=True, exist_ok=True)
-        self.twitter.generate_session(auth_token=self.auth_token)
-        # self.twitter.save_session(path=Path(self.session_path).parent)
+        # self.twitter.generate_session(auth_token=self.auth_token)
+        self.twitter.login_with_tokens(auth_token=auth_token, csrf_token=ct0)
 
     @property
     def session_path(self) -> Path:
@@ -118,13 +123,52 @@ class TwitterAPI:
     def get_user_timeline(self, screen_name: str, limit: int = 300, min_id: int = -1) -> list[dict]:
         logger.info(f"GET user timeline, target user is '{screen_name}' -> start")
         result = []
+        timeline_tweets = []
 
+        # ページング処理
+        next_cursor = ""
+        current_cursor = ""
         target_id = self.get_user_id(screen_name)
-        timeline_tweets = self.twitter.get_user_tweets(user_id=target_id.id, with_replies=True, total=limit)["data"]
+        max_page = range(math.ceil(limit / 20))
+        for _ in max_page:
+            variables_dict = {
+                "userId": str(target_id.id_str),
+                "count": 20,
+                "includePromotedContent": True,
+                "withQuickPromoteEligibilityTweetFields": True,
+                "withVoice": True,
+                "withV2Timeline": True,
+            }
+
+            if next_cursor != "":
+                variables_dict["cursor"] = next_cursor
+                current_cursor = next_cursor
+
+            timeline_tweet_partial = self.twitter.execute(
+                operation=XOperations.UserTweets,
+                variables=variables_dict,
+            )
+            timeline_tweets.append(timeline_tweet_partial["data"])
+
+            content_list = find_values(timeline_tweet_partial, "content")
+            for content in content_list:
+                if "__typename" in content and content["__typename"] == "TimelineTimelineCursor":
+                    if "cursorType" in content and content["cursorType"] == "Bottom":
+                        next_cursor = content["value"]
+                        break
+            if not next_cursor:
+                break
+            if current_cursor == next_cursor:
+                break
+
+            time.sleep(random.uniform(0.1, 0.5))
+
+        if not timeline_tweets:
+            raise ValueError("Failed getting XOperations.UserTweets -> abort")
+
         data_cache_path = Path("./data/get_user_tweets.json")
         data_cache_path.write_bytes(orjson.dumps(timeline_tweets, option=orjson.OPT_INDENT_2))
 
-        # entry_list: list[dict] = self._find_values(timeline_tweets, "entries")
         entry_list = deepcopy(timeline_tweets)
         tweet_results: list[dict] = self._find_values(entry_list, "tweet_results")
 
@@ -133,13 +177,25 @@ class TwitterAPI:
             # 返信できるアカウントを制限しているときなど階層が異なる場合がある
             if t := data_dict.get("result", {}).get("tweet", {}):
                 data_dict: dict = {"result": t}
+            # 現在の id_str を取得
+            tweet_ids = self._find_values(data_dict, "rest_id")
+
+            # 固定ツイートは除外
+            if "1674347066150240257" in tweet_ids:
+                continue
+
+            # 格納
             if data_dict:
                 tweet_list.append(data_dict)
-            # 現在の id_str を取得して min_id と一致していたら取得を打ち切る
-            tweet_ids = self._find_values(data_dict, "rest_id")
+
+            # min_id と一致していたら取得を打ち切る
             if str(min_id) in tweet_ids:
                 break
         result.extend(tweet_list)
+
+        # full_text_list: list[str] = self._find_values(result, "full_text")
+        # for full_text in full_text_list:
+        #     print(full_text)
 
         result = tweet_list[:limit]
         logger.info(f"GET user timeline, target user is '{screen_name}' -> done")
@@ -170,5 +226,5 @@ if __name__ == "__main__":
 
     pprint.pprint("TL 取得")
     # result = twitter.get_user_timeline(target_screen_name, 30, 1686617172276359168)
-    result = twitter.get_user_timeline(authorize_screen_name, 50, -1)
+    result = twitter.get_user_timeline(authorize_screen_name, 200, -1)
     pprint.pprint(len(result))

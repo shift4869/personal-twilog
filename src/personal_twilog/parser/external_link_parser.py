@@ -36,7 +36,7 @@ class ExternalLinkParser(ParserBase):
             tweet_via = re.findall("^<.+?>([^<]*?)<.+?>$", via_html)[0]
 
             legacy_screen_name: str = tweet_user_legacy.get("screen_name", "")
-            core_screen_name: str = tweet_user.get("core", {}).get("screen_name", "")
+            core_screen_name: str = tweet_user.get("legacy", {}).get("screen_name", "")
             screen_name: str = legacy_screen_name or core_screen_name
             if not screen_name:
                 raise ValueError("Not Found screen_name")

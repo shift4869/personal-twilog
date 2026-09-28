@@ -71,6 +71,7 @@ class TimelineCrawler:
         logger.info(f"Getting timeline of '{screen_name}' -> start")
         limit = 300
         tweet_list = []
+        # self.twitter = None
         if self.twitter:
             tweet_list = self.twitter.get_user_timeline(screen_name, limit, min_id)
             tweet_list = tweet_list[:-1]
