@@ -311,23 +311,11 @@ class ParserBase:
                     },
                     "legacy": l2,
                     "rest_id": rest_id,
-                    "source": source,
-                } if l1 != {} and l2 != {} and rest_id != "" and source != "":
-                    pass
-                case {
-                    "core": {
-                        "user_results": {
-                            "result": {
-                                "legacy": l1,
-                            }
-                        }
-                    },
-                    "legacy": l2,
-                    "rest_id": rest_id,
                 } if l1 != {} and l2 != {} and rest_id != "":
-                    # sourceが存在しない場合
-                    tweet["source"] = "<span>Unknown Source Client</span>"
-                    logger.warning("flatten warning, found Unknown Source Client.")
+                    # sourceは廃止された
+                    # tweet["source"] = "<span>Unknown Source Client</span>"
+                    tweet["source"] = "<span>Unknown:Twitter Web App</span>"
+                    logger.debug("flatten warning, found Unknown Source Client.")
                 case _:
                     # raise ValueError("flatten failed. invalid '__typename' or structure.")
                     logger.warning("flatten failed. invalid '__typename' or structure.")
