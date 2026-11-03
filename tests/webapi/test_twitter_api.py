@@ -25,7 +25,8 @@ class TestTwitterAPI(unittest.TestCase):
         instance = TwitterAPI(authorize_screen_name, ct0, auth_token)
 
         self.assertEqual(
-            [call(log_level="WARNING"), call().generate_session(auth_token=auth_token)], mock_twitter.mock_calls
+            [call(), call().login_with_tokens(auth_token=auth_token, csrf_token=ct0)],
+            mock_twitter.mock_calls,
         )
         return instance
 
@@ -187,17 +188,17 @@ class TestTwitterAPI(unittest.TestCase):
             mock_get_user_id.reset_mock()
 
             if params.kind_tweet_results == "normal_tweet":
-                instance.twitter.get_user_tweets.return_value = {
+                instance.twitter.execute.return_value = {
                     "data": {"tweet_results": {"result": {"rest_id": str(rest_id)}}}
                 }
             elif params.kind_tweet_results == "add_result":
-                instance.twitter.get_user_tweets.return_value = {
+                instance.twitter.execute.return_value = {
                     "data": {"tweet_results": {"result": {"tweet": {"rest_id": str(rest_id)}}}}
                 }
             elif params.kind_tweet_results == "empty_tweet":
-                instance.twitter.get_user_tweets.return_value = {"data": {"tweet_results": {}}}
+                instance.twitter.execute.return_value = {"data": {"tweet_results": {}}}
             elif params.kind_tweet_results == "empty":
-                instance.twitter.get_user_tweets.return_value = {"data": []}
+                instance.twitter.execute.return_value = {"data": []}
 
             return instance
 
