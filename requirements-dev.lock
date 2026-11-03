@@ -84,7 +84,7 @@ sqlalchemy==2.0.51
     # via personal-twilog
 tqdm==4.68.3
     # via twitter-api-client
-tweeterpy @ git+https://github.com/iSarabjitDhiman/TweeterPy@8d2416792f48ee2df43b24f47110b12cb5bb9948
+tweeterpy @ git+https://github.com/iSarabjitDhiman/TweeterPy@version-3-dev
     # via personal-twilog
 twitter-api-client==0.10.22
     # via personal-twilog
