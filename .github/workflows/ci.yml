@@ -36,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        python -m pip install -vvv -r ./requirements.lock
+        python -m pip install -r ./requirements.lock
 
     - name: Copy config file
       run: |
